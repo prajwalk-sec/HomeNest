@@ -155,9 +155,17 @@ The application provides dashboard information such as:
 
 <img width="1835" height="898" alt="HomeNest Home Page" src="https://github.com/user-attachments/assets/c7d49aee-203f-4ed8-b873-5f77011e22f0" />
 
-### 🏠 Featured Properties
+### 🏡 Featured Properties
 
 <img width="1812" height="890" alt="HomeNest Featured Properties" src="https://github.com/user-attachments/assets/380a2c1f-cfa0-4843-b54b-eab8c7f96948" />
+
+### ℹ️ About HomeNest
+
+<img width="1613" height="805" alt="HomeNest About Page" src="https://github.com/user-attachments/assets/68779333-02f9-4a5a-ad52-7cc0d5ce19d7" />
+
+### ⚙️ How It Works
+
+<img width="1647" height="790" alt="HomeNest How It Works" src="https://github.com/user-attachments/assets/c5e16fc4-7483-4efb-9bc8-5bff848c1b74" />
 
 ### 🔐 Login Page
 
