@@ -1,0 +1,159 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Property | HomeNest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'properties/css/add_property.css' %}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Owner Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'owner_dashboard' %}">Dashboard</a>
+                <a href="{% url 'add_property' %}" class="active">Add Property</a>
+                <a href="{% url 'my_properties' %}">My Properties</a>
+                <a href="{% url 'owner_rental_requests' %}">Rental Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                <section class="form-panel">
+                    <div class="form-intro">
+                        <span class="eyebrow">Owner Portal</span>
+                        <h1>Add a new property</h1>
+                        <p>List your rental property with clear details so tenants can discover it quickly.</p>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data" class="property-form">
+                        {% csrf_token %}
+
+                        <div class="form-grid">
+                            <div class="form-field full-width">
+                                <label for="image">Property Image</label>
+                                <input
+                                    id="image"
+                                    class="file-input"
+                                    type="file"
+                                    name="image"
+                                    accept="image/*"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field full-width">
+                                <label for="title">Property Title</label>
+                                <input
+                                    id="title"
+                                    type="text"
+                                    name="title"
+                                    placeholder="Enter property title"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field full-width">
+                                <label for="description">Description</label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    placeholder="Describe the property"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="property_type">Property Type</label>
+                                <select id="property_type" name="property_type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="HOUSE">House</option>
+                                    <option value="APARTMENT">Apartment</option>
+                                    <option value="VILLA">Villa</option>
+                                    <option value="ROOM">Room</option>
+                                    <option value="PG">PG</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="city">City</label>
+                                <input
+                                    id="city"
+                                    type="text"
+                                    name="city"
+                                    placeholder="Enter city"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field full-width">
+                                <label for="address">Address</label>
+                                <textarea
+                                    id="address"
+                                    name="address"
+                                    placeholder="Enter full address"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="rent">Monthly Rent</label>
+                                <input
+                                    id="rent"
+                                    type="number"
+                                    name="rent"
+                                    placeholder="Enter monthly rent"
+                                    min="0"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="bedrooms">Bedrooms</label>
+                                <input
+                                    id="bedrooms"
+                                    type="number"
+                                    name="bedrooms"
+                                    min="1"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="bathrooms">Bathrooms</label>
+                                <input
+                                    id="bathrooms"
+                                    type="number"
+                                    name="bathrooms"
+                                    min="1"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">Add Property</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

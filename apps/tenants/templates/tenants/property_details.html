@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ property.title }} | HomeNest</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'tenants/css/property_details.css' %}">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Tenant Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'tenant_dashboard' %}">Dashboard</a>
+                <a href="{% url 'available_properties' %}" class="active">Browse Properties</a>
+                <a href="{% url 'my_rental_requests' %}">My Rental Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                {% if messages %}
+                    <div class="toast-container" aria-live="polite" aria-atomic="true">
+                        {% for message in messages %}
+                            <div class="toast success-toast {{ message.tags }}" role="status">
+                                <span class="toast-icon">✓</span>
+                                <span class="toast-text">{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="page-header property-header">
+                    <h1>{{ property.title }}</h1>
+                    <a href="{% url 'available_properties' %}" class="back-link">← Back to Properties</a>
+                </div>
+
+                <div class="property-details-card">
+                    <div class="image-section">
+                        {% if property.image %}
+                            <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image">
+                        {% else %}
+                            <div class="no-image">No Image Available</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="property-info">
+                        <p class="location">📍 {{ property.city }}</p>
+
+                        <div class="info-section">
+                            <h2>Property Information</h2>
+                            <p><strong>Property Type:</strong> {{ property.get_property_type_display }}</p>
+                            <p><strong>Bedrooms:</strong> {{ property.bedrooms }}</p>
+                            <p><strong>Bathrooms:</strong> {{ property.bathrooms }}</p>
+                            <p><strong>Address:</strong> {{ property.address }}</p>
+                            <p><strong>Status:</strong> {{ property.get_status_display }}</p>
+                            <p class="rent">₹{{ property.rent }} / month</p>
+                        </div>
+
+                        <div class="info-section">
+                            <h2>Description</h2>
+                            <p>{{ property.description }}</p>
+                        </div>
+
+                        <div class="info-section owner-section">
+                            <h2>Owner Information</h2>
+                            <p><strong>Name:</strong> {{ property.owner.first_name }} {{ property.owner.last_name }}</p>
+                            <p><strong>Email:</strong> {{ property.owner.email }}</p>
+                        </div>
+
+                        <div class="info-section rental-section">
+                            <div class="rental-intro">
+                                <h2>Interested in this property?</h2>
+                                <p>Send a rental request to the owner.</p>
+                            </div>
+
+                            <form method="POST" action="{% url 'send_rental_request' property.id %}" class="rental-form">
+                                {% csrf_token %}
+                                <button type="submit" class="apply-btn">Apply for Rental</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(function (toast, index) {
+                setTimeout(function () { toast.classList.add('show'); }, 80 + index * 150);
+                setTimeout(function () {
+                    toast.classList.remove('show');
+                    setTimeout(function () { toast.remove(); }, 250);
+                }, 3200 + index * 200);
+            });
+        });
+    </script>
+</body>
+
+</html>

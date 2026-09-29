@@ -1,0 +1,131 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Property | HomeNest</title>
+
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'properties/css/edit_property.css' %}">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Owner Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'owner_dashboard' %}">Dashboard</a>
+                <a href="{% url 'add_property' %}">Add Property</a>
+                <a href="{% url 'my_properties' %}" class="active">My Properties</a>
+                <a href="{% url 'owner_rental_requests' %}">Rental Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                <div class="page-header">
+                    <h1>Edit Property</h1>
+                    <p>Update your property details below.</p>
+                </div>
+
+                <div class="edit-container">
+                    <div class="edit-card">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            {% if property.image %}
+                                <div class="form-group current-image">
+                                    <label>Current Property Image</label>
+                                    <img src="{{ property.image.url }}" alt="{{ property.title }}">
+                                </div>
+                            {% endif %}
+
+                            <div class="form-group">
+                                <label>Property Image</label>
+                                <input type="file" name="image" accept="image/*">
+                                <p class="help-text">Leave this empty if you want to keep the current image.</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Property Title</label>
+                                <input type="text" name="title" value="{{ property.title }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea name="description" required>{{ property.description }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Property Type</label>
+                                <select name="property_type" required>
+                                    <option value="HOUSE" {% if property.property_type == "HOUSE" %}selected{% endif %}>House</option>
+                                    <option value="APARTMENT" {% if property.property_type == "APARTMENT" %}selected{% endif %}>Apartment</option>
+                                    <option value="VILLA" {% if property.property_type == "VILLA" %}selected{% endif %}>Villa</option>
+                                    <option value="ROOM" {% if property.property_type == "ROOM" %}selected{% endif %}>Room</option>
+                                    <option value="PG" {% if property.property_type == "PG" %}selected{% endif %}>PG</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea name="address" required>{{ property.address }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>City</label>
+                                <input type="text" name="city" value="{{ property.city }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Monthly Rent</label>
+                                <input type="number" name="rent" value="{{ property.rent }}" min="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Bedrooms</label>
+                                <input type="number" name="bedrooms" value="{{ property.bedrooms }}" min="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Bathrooms</label>
+                                <input type="number" name="bathrooms" value="{{ property.bathrooms }}" min="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status" required>
+                                    <option value="AVAILABLE" {% if property.status == "AVAILABLE" %}selected{% endif %}>Available</option>
+                                    <option value="RENTED" {% if property.status == "RENTED" %}selected{% endif %}>Rented</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="save-button">Update Property</button>
+                                <a href="{% url 'my_properties' %}" class="cancel-button">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="page-footer">
+                    <a href="{% url 'my_properties' %}" class="back-link">← Back to My Properties</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

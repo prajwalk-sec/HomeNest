@@ -1,0 +1,200 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenant Dashboard | HomeNest</title>
+
+<link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'tenants/css/dashboard.css' %}">
+```
+
+</head>
+
+<body>
+
+```
+<div class="dashboard-container">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <h2>HomeNest</h2>
+            <p>Tenant Panel</p>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{% url 'tenant_dashboard' %}" class="active">
+                Dashboard
+            </a>
+
+            <a href="{% url 'available_properties' %}">
+                Browse Properties
+            </a>
+
+            <a href="{% url 'my_rental_requests' %}">
+                My Rental Requests
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="{% url 'logout' %}" class="logout-link">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+        <!-- Welcome Section -->
+
+        <section class="welcome-panel">
+
+            <div class="welcome-copy">
+
+                <p class="welcome-eyebrow">
+                    Tenant Dashboard
+                </p>
+
+                <h1>
+                    Welcome back,
+                    {{ request.user.first_name|default:request.user.username }}
+                </h1>
+
+            </div>
+
+
+            <div class="welcome-meta">
+
+                <div>
+                    <span>Email</span>
+                    <strong>
+                        {{ request.user.email }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Role</span>
+                    <strong>
+                        {{ request.user.role }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= OVERVIEW ================= -->
+
+        <h2>Overview</h2>
+
+        <div class="dashboard-stats">
+
+            <div class="stat-card">
+
+                <h3>
+                    My Rentals
+                </h3>
+
+                <p>
+                    {{ total_rentals|default:0 }}
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Active Rental
+                </h3>
+
+                <p>
+                    {{ active_rentals|default:0 }}
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Maintenance Requests
+                </h3>
+
+                <p>
+                    {{ maintenance_requests|default:0 }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <hr>
+
+
+        <!-- ================= QUICK ACTIONS ================= -->
+
+        <h2>
+            Quick Actions
+        </h2>
+
+        <div class="actions-grid">
+
+            <a
+                href="{% url 'available_properties' %}"
+                class="action-btn"
+            >
+                Browse Properties
+            </a>
+
+
+            <a
+                href="{% url 'my_rental_requests' %}"
+                class="action-btn"
+            >
+                My Rental Requests
+            </a>
+
+
+            <a
+                href="#"
+                class="action-btn"
+            >
+                My Profile
+            </a>
+
+
+            <a
+                href="{% url 'create_maintenance_request' %}"
+                class="action-btn"
+            >
+                Maintenance
+            </a>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+</body>
+
+</html>

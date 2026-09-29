@@ -1,0 +1,117 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | HomeNest</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
+</head>
+
+<body>
+    <div class="auth-page reveal-scale">
+        <header class="auth-header reveal">
+            <div class="header-brand">
+                <a href="{% url 'home' %}" class="nav-logo" aria-label="HomeNest home">
+                    <span class="logo-icon"><i class="fa-solid fa-house-chimney"></i></span>
+                    <span>HomeNest</span>
+                </a>
+            </div>
+
+            <div class="auth-actions">
+                <a href="{% url 'home' %}" class="btn-secondary">Back to Home</a>
+            </div>
+        </header>
+
+        <main class="auth-shell">
+            <section class="auth-hero reveal reveal-left">
+                <p class="eyebrow">Rental Platform for Everyone</p>
+                <h1>Find a place that feels like home.</h1>
+            </section>
+
+            <div class="auth-container reveal reveal-right">
+                <div class="auth-card">
+                    <div class="auth-badge">Welcome back</div>
+                    <h2>Login to HomeNest</h2>
+
+                    <p class="auth-subtitle">
+                        Continue your rental journey with a secure account
+                    </p>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="message {{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter your email"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="auth-button">
+                            Login
+                        </button>
+                    </form>
+
+                    <p class="auth-footer">
+                        Don’t have an account?
+                        <a href="{% url 'register' %}">Create Account</a>
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const revealItems = document.querySelectorAll('.reveal, .reveal-scale');
+            if (!revealItems.length) return;
+
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.15,
+                rootMargin: '0px 0px -10% 0px'
+            });
+
+            revealItems.forEach(item => revealObserver.observe(item));
+        });
+    </script>
+</body>
+</html>

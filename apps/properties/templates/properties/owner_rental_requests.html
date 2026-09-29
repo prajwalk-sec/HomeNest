@@ -1,0 +1,174 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Rental Requests | HomeNest</title> 
+ 
+    {% load static %} 
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'properties/css/owner_rental_requests.css' %}"> 
+</head> 
+ 
+<body> 
+ 
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Owner Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'owner_dashboard' %}">Dashboard</a>
+                <a href="{% url 'add_property' %}">Add Property</a>
+                <a href="{% url 'my_properties' %}">My Properties</a>
+                <a href="{% url 'owner_rental_requests' %}" class="active">Rental Requests</a>
+                <a href="{% url 'owner_maintenance_requests' %}">Maintenance Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                <div class="container"> 
+                    <h1>Rental Requests</h1> 
+                    <p class="subtitle">View and manage rental requests from tenants.</p> 
+
+                    {% if messages %}
+                        <div class="messages-container">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                 
+                    <div class="requests-container"> 
+                        {% for rental in rentals %} 
+                            <div class="rental-card"> 
+                                <div class="image-section"> 
+                                    {% if rental.property.image %} 
+                                        <img 
+                                            src="{{ rental.property.image.url }}" 
+                                            alt="{{ rental.property.title }}" 
+                                            class="property-image" 
+                                        > 
+                                    {% else %} 
+                                        <div class="no-image"> 
+                                            No Image Available 
+                                        </div> 
+                                    {% endif %} 
+                                </div> 
+
+                                <div class="rental-content"> 
+                                    <h2>{{ rental.property.title }}</h2> 
+                                    <p class="location">📍 {{ rental.property.city }}</p> 
+                                    <p class="rent">₹{{ rental.property.rent }} / month</p> 
+
+                                    <hr> 
+                                    <h3>Tenant Information</h3> 
+                                    <p><strong>Name:</strong> {{ rental.tenant.first_name }} {{ rental.tenant.last_name }}</p> 
+                                    <p><strong>Email:</strong> {{ rental.tenant.email }}</p> 
+
+                                    <div class="status-section"> 
+                                        <strong>Status:</strong> 
+                                        {% if rental.status == "PENDING" %} 
+                                            <span class="status pending">Pending</span> 
+                                        {% elif rental.status == "APPROVED" %} 
+                                            <span class="status approved">Accepted</span> 
+                                        {% elif rental.status == "REJECTED" %} 
+                                            <span class="status rejected">Rejected</span> 
+                                        {% endif %} 
+                                    </div> 
+
+                                    <p class="request-date"> 
+                                        <strong>Request Date:</strong> 
+                                        {{ rental.created_at|date:"d M Y, h:i A" }} 
+                                    </p> 
+
+                                    <div class="actions">
+                                        {% if rental.status == "PENDING" %} 
+                                            <form 
+                                                method="POST" 
+                                                action="{% url 'approve_rental_request' rental.id %}" 
+                                                onsubmit="return handleActionConfirm(event, 'Accept', '{{ rental.property.title|escapejs }}');"
+                                            > 
+                                                {% csrf_token %} 
+                                                <button type="submit" class="approve-btn"> 
+                                                    Accept 
+                                                </button> 
+                                            </form> 
+
+                                            <form 
+                                                method="POST" 
+                                                action="{% url 'reject_rental_request' rental.id %}" 
+                                                onsubmit="return handleActionConfirm(event, 'Reject', '{{ rental.property.title|escapejs }}');"
+                                            > 
+                                                {% csrf_token %} 
+                                                <button type="submit" class="reject-btn"> 
+                                                    Reject 
+                                                </button> 
+                                            </form> 
+
+                                        {% else %}
+                                            {% if rental.status == "APPROVED" %}
+                                                <form 
+                                                    method="POST" 
+                                                    action="{% url 'reject_rental_request' rental.id %}"
+                                                    onsubmit="return handleActionConfirm(event, 'Reject', '{{ rental.property.title|escapejs }}');"
+                                                >
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="reject-btn outline">
+                                                        Switch to Reject
+                                                    </button>
+                                                </form>
+                                            {% elif rental.status == "REJECTED" %}
+                                                <form 
+                                                    method="POST" 
+                                                    action="{% url 'approve_rental_request' rental.id %}"
+                                                    onsubmit="return handleActionConfirm(event, 'Accept', '{{ rental.property.title|escapejs }}');"
+                                                >
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="approve-btn outline">
+                                                        Switch to Accept
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        {% endif %} 
+                                    </div> 
+                                </div> 
+                            </div> 
+                        {% empty %} 
+                            <div class="empty-message"> 
+                                <h2>No Rental Requests</h2> 
+                                <p>You don't have any rental requests yet.</p> 
+                                <a href="{% url 'owner_dashboard' %}" class="back-btn"> 
+                                    Back to Dashboard 
+                                </a> 
+                            </div> 
+                        {% endfor %} 
+                    </div> 
+                </div> 
+            </div>
+        </main>
+    </div> 
+
+    <script>
+        function handleActionConfirm(event, actionType, title) {
+            const confirmMsg = `Are you sure you want to ${actionType.toLowerCase()} the rental request for "${title}"?`;
+            if (confirm(confirmMsg)) {
+                alert(`Request ${actionType === 'Accept' ? 'Accepted' : 'Rejected'} successfully!`);
+                return true;
+            }
+            return false;
+        }
+    </script>
+
+</body> 
+</html>

@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Properties | HomeNest</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'tenants/css/available_properties.css' %}">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Tenant Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'tenant_dashboard' %}">Dashboard</a>
+                <a href="{% url 'available_properties' %}" class="active">Browse Properties</a>
+                <a href="{% url 'my_rental_requests' %}">My Rental Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                <div class="page-header">
+                    <h1>Available Properties</h1>
+                    <p>Find a property that matches your requirements.</p>
+                </div>
+
+                <form method="GET" class="search-form">
+                    <input type="text" name="city" placeholder="Search by city" value="{{ city|default:'' }}">
+
+                    <select name="property_type">
+                        <option value="">All Property Types</option>
+                        <option value="HOUSE" {% if property_type == "HOUSE" %}selected{% endif %}>House</option>
+                        <option value="APARTMENT" {% if property_type == "APARTMENT" %}selected{% endif %}>Apartment</option>
+                        <option value="VILLA" {% if property_type == "VILLA" %}selected{% endif %}>Villa</option>
+                        <option value="ROOM" {% if property_type == "ROOM" %}selected{% endif %}>Room</option>
+                        <option value="PG" {% if property_type == "PG" %}selected{% endif %}>PG</option>
+                    </select>
+
+                    <input type="number" name="max_rent" placeholder="Maximum rent" value="{{ max_rent|default:'' }}" min="0">
+
+                    <button type="submit" class="search-btn">Search</button>
+                    <a href="{% url 'available_properties' %}" class="clear-btn">Clear</a>
+                </form>
+
+                <div class="properties-grid">
+                    {% for property in properties %}
+                        <div class="property-card">
+                            {% if property.image %}
+                                <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image">
+                            {% else %}
+                                <div class="no-image">No Image Available</div>
+                            {% endif %}
+
+                            <div class="property-content">
+                                <h2>{{ property.title }}</h2>
+                                <p class="location">📍 {{ property.city }}</p>
+                                <p><strong>Type:</strong> {{ property.get_property_type_display }}</p>
+                                <p><strong>Bedrooms:</strong> {{ property.bedrooms }}</p>
+                                <p><strong>Bathrooms:</strong> {{ property.bathrooms }}</p>
+                                <p><strong>Address:</strong> {{ property.address }}</p>
+                                <p class="rent">₹{{ property.rent }} / month</p>
+                                <a href="{% url 'property_details' property.id %}" class="details-btn">View Details</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="empty-message">
+                            <h2>No properties available</h2>
+                            {% if city or property_type or max_rent %}
+                                <p>No available properties match your search.</p>
+                                <a href="{% url 'available_properties' %}" class="clear-empty-btn">View All Properties</a>
+                            {% else %}
+                                <p>Please check again later.</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

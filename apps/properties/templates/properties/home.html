@@ -1,0 +1,416 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeNest — Find Your Perfect Place</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'properties/css/home.css' %}" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="{% url 'home' %}" class="nav-logo">
+        <span class="logo-icon"><i class="fa-solid fa-house-chimney"></i></span>
+        HomeNest
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="{% url 'home' %}" class="nav-link active">Home</a>
+        <a href="{% url 'available_properties' %}" class="nav-link">Properties</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="nav-actions" id="navActions">
+        {% if user.is_authenticated %}
+          {% if user.is_owner %}
+            <a href="{% url 'owner_dashboard' %}" class="btn-ghost">Dashboard</a>
+          {% else %}
+            <a href="{% url 'tenant_dashboard' %}" class="btn-ghost">Dashboard</a>
+          {% endif %}
+          <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary-sm btn-logout">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn-ghost">Login</a>
+          <a href="{% url 'register' %}" class="btn-primary-sm">Register</a>
+        {% endif %}
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+      <a href="{% url 'home' %}" class="mobile-link">Home</a>
+      <a href="{% url 'available_properties' %}" class="mobile-link">Properties</a>
+      <a href="#about" class="mobile-link">About</a>
+      <a href="#contact" class="mobile-link">Contact</a>
+      <div class="mobile-actions">
+        {% if user.is_authenticated %}
+          {% if user.is_owner %}
+            <a href="{% url 'owner_dashboard' %}" class="btn-ghost">Dashboard</a>
+          {% else %}
+            <a href="{% url 'tenant_dashboard' %}" class="btn-ghost">Dashboard</a>
+          {% endif %}
+          <form action="{% url 'logout' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary-sm btn-logout">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn-ghost">Login</a>
+          <a href="{% url 'register' %}" class="btn-primary-sm">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Rental Platform for Everyone</p>
+      <h1 class="hero-heading">
+        Find Your Perfect<br />
+        <em>Place to Call Home</em>
+      </h1>
+      <p class="hero-sub">
+        Discover beautiful homes, apartments, villas and rooms<br class="hide-mobile" />
+        that match your lifestyle and budget.
+      </p>
+
+      <!-- Search Box -->
+      <form class="search-box" action="{% url 'available_properties' %}" method="GET">
+        <div class="search-field">
+          <label for="search-city"><i class="fa-solid fa-location-dot"></i> City</label>
+          <input type="text" id="search-city" name="city" value="{{ request.GET.city|default:'' }}" placeholder="e.g. Mumbai, Delhi…" />
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <label for="search-type"><i class="fa-solid fa-building"></i> Type</label>
+          <select id="search-type" name="property_type">
+            <option value="">Any Type</option>
+            <option value="HOUSE" {% if request.GET.property_type == "HOUSE" %}selected{% endif %}>House</option>
+            <option value="APARTMENT" {% if request.GET.property_type == "APARTMENT" %}selected{% endif %}>Apartment</option>
+            <option value="VILLA" {% if request.GET.property_type == "VILLA" %}selected{% endif %}>Villa</option>
+            <option value="ROOM" {% if request.GET.property_type == "ROOM" %}selected{% endif %}>Room</option>
+            <option value="PG" {% if request.GET.property_type == "PG" %}selected{% endif %}>PG</option>
+          </select>
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <label for="search-max-rent"><i class="fa-solid fa-indian-rupee-sign"></i> Max Rent</label>
+          <input type="number" id="search-max-rent" name="max_rent" value="{{ request.GET.max_rent|default:'' }}" placeholder="e.g. 25000" min="0" />
+        </div>
+        <button type="submit" class="search-btn">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+      </form>
+
+      <!-- Stats -->
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num">500+</span>
+          <span class="stat-label">Properties</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <span class="stat-num">300+</span>
+          <span class="stat-label">Happy Tenants</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <span class="stat-num">100+</span>
+          <span class="stat-label">Trusted Owners</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <span class="stat-num">20+</span>
+          <span class="stat-label">Cities</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED PROPERTIES ===== -->
+  <section class="section properties-compact-wrapper reveal-scale" id="properties">
+  <div class="container">
+    
+    <!-- Animated Section Header -->
+    <div class="section-header reveal-scale">
+      <div class="animate-text-container">
+        <h2 class="section-title trending-heading">Featured Properties</h2>
+      </div>
+      <p class="section-sub trending-subtext">Explore available properties on HomeNest.</p>
+    </div>
+
+    {% if properties %}
+    <!-- Staggered Animated Property Grid -->
+    <div class="property-grid">
+      {% for property in properties|slice:":3" %}
+      <article class="property-card reveal" style="--card-index: {{ forloop.counter0 }};">
+        <div class="card-image">
+          {% if property.image %}
+            <img src="{{ property.image.url }}" alt="{{ property.title }}" loading="lazy" />
+          {% else %}
+            <div class="card-image-placeholder">
+              <i class="fa-solid fa-house-chimney"></i>
+            </div>
+          {% endif %}
+          <span class="card-badge">{{ property.get_property_type_display }}</span>
+        </div>
+
+        <div class="card-body">
+          <h3 class="card-title">{{ property.title }}</h3>
+          <p class="card-location">
+            <i class="fa-solid fa-location-dot"></i> {{ property.city }}
+          </p>
+
+          <div class="card-meta">
+            <span><i class="fa-solid fa-bed"></i> {{ property.bedrooms }} Bed</span>
+            <span><i class="fa-solid fa-shower"></i> {{ property.bathrooms }} Bath</span>
+          </div>
+
+          <div class="card-footer">
+            <div class="card-rent">
+              <span class="rent-amount">₹{{ property.rent|floatformat:0 }}</span>
+              <span class="rent-period">/month</span>
+            </div>
+            <a href="{% url 'property_details' property.pk %}" class="card-btn">View Details</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- Section Call to Action -->
+    <div class="section-cta reveal">
+      <a href="{% url 'available_properties' %}" class="btn-outline">
+        View All Properties <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+    {% else %}
+    <!-- Animated Empty State -->
+    <div class="empty-state reveal-scale">
+      <div class="empty-icon">
+        <i class="fa-solid fa-house-chimney-crack"></i>
+      </div>
+      <h3>No Properties Listed Yet</h3>
+      <p>We're growing! Check back soon or browse all listings.</p>
+      <a href="{% url 'available_properties' %}" class="btn-primary">Explore Properties</a>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+  <!-- ===== CATEGORIES ===== -->
+  <section class="section section-tinted reveal-scale" id="categories">
+    <div class="container">
+      <div class="section-header reveal-scale">
+        <h2 class="section-title">Browse by Category</h2>
+        <p class="section-sub">Whatever you're looking for, we have it.</p>
+      </div>
+      <div class="category-grid">
+        <a href="{% url 'available_properties' %}?property_type=HOUSE" class="category-card reveal">
+          <div class="cat-icon"><i class="fa-solid fa-house"></i></div>
+          <h3 class="cat-name">Houses</h3>
+          <p class="cat-desc">Spacious independent homes with gardens and parking.</p>
+          <span class="cat-link">Explore <i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+        <a href="{% url 'available_properties' %}?property_type=APARTMENT" class="category-card reveal">
+          <div class="cat-icon"><i class="fa-solid fa-building"></i></div>
+          <h3 class="cat-name">Apartments</h3>
+          <p class="cat-desc">Modern flats in gated societies with amenities.</p>
+          <span class="cat-link">Explore <i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+        <a href="{% url 'available_properties' %}?property_type=VILLA" class="category-card reveal">
+          <div class="cat-icon"><i class="fa-solid fa-landmark"></i></div>
+          <h3 class="cat-name">Villas</h3>
+          <p class="cat-desc">Premium villas with private pools and lush surroundings.</p>
+          <span class="cat-link">Explore <i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+        <a href="{% url 'available_properties' %}?property_type=ROOM" class="category-card reveal">
+          <div class="cat-icon"><i class="fa-solid fa-door-open"></i></div>
+          <h3 class="cat-name">Rooms</h3>
+          <p class="cat-desc">Affordable single rooms ideal for students and professionals.</p>
+          <span class="cat-link">Explore <i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+        <a href="{% url 'available_properties' %}?property_type=PG" class="category-card reveal">
+          <div class="cat-icon"><i class="fa-solid fa-person-shelter"></i></div>
+          <h3 class="cat-name">PG</h3>
+          <p class="cat-desc">Paying guest accommodations with meals and utilities.</p>
+          <span class="cat-link">Explore <i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WHY HOMENEST ===== -->
+  <section class="section reveal-scale" id="about">
+    <div class="container">
+      <div class="section-header reveal-scale">
+        <h2 class="section-title">Why Choose HomeNest?</h2>
+        <p class="section-sub">We make renting simple, transparent, and stress-free for everyone.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card reveal">
+          <div class="why-icon why-blue">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3>Verified Properties</h3>
+          <p>Every listing is reviewed to ensure accuracy and authenticity before it goes live.</p>
+        </div>
+        <div class="why-card reveal">
+          <div class="why-icon why-amber">
+            <i class="fa-solid fa-paper-plane"></i>
+          </div>
+          <h3>Easy Rental Requests</h3>
+          <p>Send rental requests to owners in seconds — no phone calls, no middlemen.</p>
+        </div>
+        <div class="why-card reveal">
+          <div class="why-icon why-green">
+            <i class="fa-solid fa-handshake"></i>
+          </div>
+          <h3>Trusted Owners</h3>
+          <p>All owners are registered and their properties are linked to verified accounts.</p>
+        </div>
+        <div class="why-card reveal">
+          <div class="why-icon why-navy">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h3>Simple &amp; Secure</h3>
+          <p>Your personal data stays private. Our platform is built with security from the ground up.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="section section-tinted how-section reveal-scale">
+    <div class="container">
+      <div class="section-header reveal-scale">
+        <h2 class="section-title">How HomeNest Works</h2>
+        <p class="section-sub">Three simple steps to your next home.</p>
+      </div>
+      <div class="steps-row">
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <div class="step-connector"></div>
+          <div class="step-icon"><i class="fa-solid fa-magnifying-glass-location"></i></div>
+          <h3 class="step-title">Find a Property</h3>
+          <p class="step-desc">Browse properties that match your city, budget, and lifestyle requirements.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">02</div>
+          <div class="step-connector"></div>
+          <div class="step-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <h3 class="step-title">Send Rental Request</h3>
+          <p class="step-desc">Submit your request directly to the owner — no agents, no hidden fees.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">03</div>
+          <div class="step-connector hide-last"></div>
+          <div class="step-icon"><i class="fa-solid fa-key"></i></div>
+          <h3 class="step-title">Move Into Your Home</h3>
+          <p class="step-desc">Once approved, connect with the owner and begin your rental journey.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA BANNER ===== -->
+  <section class="cta-section reveal-scale">
+    <div class="cta-inner reveal">
+      <h2 class="cta-heading">Ready to Find Your New Home?</h2>
+      <p class="cta-sub">Start exploring properties on HomeNest today — it takes less than a minute.</p>
+      <div class="cta-buttons">
+        <a href="{% url 'available_properties' %}" class="cta-btn-primary">
+          <i class="fa-solid fa-compass"></i> Browse Properties
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}" class="cta-btn-ghost">
+          Create Account <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="contact">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="{% url 'home' %}" class="footer-logo">
+          <i class="fa-solid fa-house-chimney"></i> HomeNest
+        </a>
+        <p class="footer-tagline">Making property rental simple, transparent, and convenient for owners and tenants across India.</p>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="Twitter/X"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'available_properties' %}">Properties</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Account</h4>
+        <ul>
+          {% if user.is_authenticated %}
+            {% if user.is_owner %}
+              <li><a href="{% url 'owner_dashboard' %}">Owner Dashboard</a></li>
+            {% else %}
+              <li><a href="{% url 'tenant_dashboard' %}">Tenant Dashboard</a></li>
+            {% endif %}
+          {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Contact</h4>
+        <ul>
+          <li><i class="fa-solid fa-envelope"></i> hello@homenest.in</li>
+          <li><i class="fa-solid fa-phone"></i> +91 98765 43210</li>
+          <li><i class="fa-solid fa-location-dot"></i> Bengaluru, Karnataka</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 HomeNest. All rights reserved.</p>
+      <p>Built with <i class="fa-solid fa-heart" style="color:#E8793A;"></i> for India's rental market.</p>
+    </div>
+  </footer>
+
+  <!-- Back to top -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <i class="fa-solid fa-chevron-up"></i>
+  </button>
+
+  <script src="{% static 'properties/js/home.js' %}"></script>
+</body>
+</html>

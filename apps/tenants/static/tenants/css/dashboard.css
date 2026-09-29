@@ -1,0 +1,106 @@
+
+.main-content {
+    padding: 36px 40px 60px;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 1100px;
+    box-sizing: border-box;
+}
+
+.main-content h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    color: #0f2240;
+    margin-bottom: 18px;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 18px;
+    margin-bottom: 36px;
+}
+
+.stat-card {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid rgba(15, 34, 64, 0.07);
+    border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(15, 34, 64, 0.08);
+    padding: 24px 24px 22px;
+    min-height: 124px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #e8793a, #0f2240);
+    border-radius: 14px 14px 0 0;
+}
+
+.stat-card h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #647b9e;
+    margin-bottom: 12px;
+}
+
+.stat-card p {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #0f2240;
+    line-height: 1;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #e8793a, #d0612a);
+    color: #ffffff;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 10px 18px rgba(232, 121, 58, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(232, 121, 58, 0.24);
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        padding: 24px 20px 40px;
+    }
+
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+}
+

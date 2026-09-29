@@ -1,0 +1,132 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Requests | HomeNest</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'properties/css/owner_rental_requests.css' %}">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Owner Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'owner_dashboard' %}">Dashboard</a>
+                <a href="{% url 'add_property' %}">Add Property</a>
+                <a href="{% url 'my_properties' %}">My Properties</a>
+                <a href="{% url 'owner_rental_requests' %}" class="active">Rental Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                <div class="container">
+                    <div class="page-header">
+                        <h1>Rental Requests</h1>
+                        <p>Manage rental requests from tenants.</p>
+                    </div>
+
+                    {% for rental in rental_requests %}
+                        <div class="rental-request-card">
+                            <div class="request-header">
+                                <div>
+                                    <span class="request-tag">Rental Request</span>
+                                    <h2>{{ rental.property.title }}</h2>
+                                </div>
+
+                                {% if rental.status == "PENDING" %}
+                                    <span class="status status-pending">{{ rental.get_status_display }}</span>
+                                {% elif rental.status == "APPROVED" %}
+                                    <span class="status status-approved">{{ rental.get_status_display }}</span>
+                                {% elif rental.status == "REJECTED" %}
+                                    <span class="status status-rejected">{{ rental.get_status_display }}</span>
+                                {% else %}
+                                    <span class="status">{{ rental.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="request-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Tenant</span>
+                                    <span class="detail-value">
+                                        {{ rental.tenant.first_name|default:rental.tenant.username }} {{ rental.tenant.last_name }}
+                                    </span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Property</span>
+                                    <span class="detail-value">{{ rental.property.title }}</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Move-in Date</span>
+                                    <span class="detail-value">15 Oct 2026</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Occupants</span>
+                                    <span class="detail-value">2</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Phone</span>
+                                    <span class="detail-value">
+                                        {% if rental.tenant.tenant_profile %}
+                                            {{ rental.tenant.tenant_profile.phone|default:"Not provided" }}
+                                        {% else %}
+                                            9876543210
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Requested</span>
+                                    <span class="detail-value">{{ rental.created_at|date:"d M Y, h:i A" }}</span>
+                                </div>
+                            </div>
+
+                            <div class="request-message">
+                                <span class="detail-label">Message</span>
+                                <p>I'm interested in renting this property and would like to know more about the move-in process.</p>
+                            </div>
+
+                            <div class="request-actions">
+                                <form method="POST" action="{% url 'approve_rental_request' rental.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="approve-btn">Approve</button>
+                                </form>
+
+                                <form method="POST" action="{% url 'reject_rental_request' rental.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="reject-btn">Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="empty-state">
+                            <h2>No Rental Requests</h2>
+                            <p>No rental requests found.</p>
+                        </div>
+                    {% endfor %}
+
+                    <a href="{% url 'owner_dashboard' %}" class="back-button">Back to Dashboard</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

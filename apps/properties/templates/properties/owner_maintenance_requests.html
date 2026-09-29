@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Requests | HomeNest</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'properties/css/owner_rental_requests.css' %}">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>HomeNest</h2>
+                <p>Owner Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'owner_dashboard' %}">Dashboard</a>
+                <a href="{% url 'add_property' %}">Add Property</a>
+                <a href="{% url 'my_properties' %}">My Properties</a>
+                <a href="{% url 'owner_rental_requests' %}">Rental Requests</a>
+                <a href="{% url 'owner_maintenance_requests' %}" class="active">Maintenance Requests</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content admin-main">
+            <div class="admin-shell">
+                <div class="container">
+                    <h1>Maintenance Requests</h1>
+                    <p class="subtitle">Review maintenance issues raised by tenants for your properties.</p>
+
+                    {% if messages %}
+                        <div class="messages-container">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="requests-container">
+                        {% for request in maintenance_requests %}
+                            <div class="rental-card">
+                                <div class="image-section">
+                                    {% if request.issue_image %}
+                                        <img src="{{ request.issue_image.url }}" alt="{{ request.title }}" class="property-image">
+                                    {% else %}
+                                        <div class="no-image">
+                                            No Photo
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="rental-content">
+                                    <h2>{{ request.property.title }}</h2>
+                                    <p class="location">📍 {{ request.property.city }}</p>
+
+                                    <hr>
+                                    <h3>Tenant Information</h3>
+                                    <p><strong>Name:</strong> {{ request.tenant.first_name }} {{ request.tenant.last_name }}</p>
+                                    <p><strong>Email:</strong> {{ request.tenant.email }}</p>
+
+                                    <h3>Issue Details</h3>
+                                    <p><strong>Title:</strong> {{ request.title }}</p>
+                                    <p><strong>Priority:</strong> {{ request.priority }}</p>
+                                    <p><strong>Status:</strong> {{ request.status }}</p>
+                                    <p><strong>Description:</strong> {{ request.description }}</p>
+
+                                    {% if request.owner_note %}
+                                        <p><strong>Owner Note:</strong> {{ request.owner_note }}</p>
+                                    {% endif %}
+
+                                    <p class="request-date">
+                                        <strong>Submitted:</strong>
+                                        {{ request.created_at|date:"d M Y, h:i A" }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="empty-message">
+                                <h2>No Maintenance Requests</h2>
+                                <p>You don't have any maintenance requests yet.</p>
+                                <a href="{% url 'owner_dashboard' %}" class="back-btn">
+                                    Back to Dashboard
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

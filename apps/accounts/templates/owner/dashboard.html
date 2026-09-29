@@ -1,0 +1,331 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'accounts/css/dashboard.css' %}"
+    >
+
+    <title>Owner Dashboard | HomeNest</title>
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+
+    <div class="sidebar-logo">
+
+        <h2>HomeNest</h2>
+
+        <p>Owner Panel</p>
+
+    </div>
+
+
+    <nav class="sidebar-nav">
+
+
+        <a
+            href="{% url 'owner_dashboard' %}"
+            class="active"
+        >
+            Dashboard
+        </a>
+
+
+        <a
+            href="{% url 'add_property' %}"
+        >
+            Add Property
+        </a>
+
+
+        <a
+            href="{% url 'my_properties' %}"
+        >
+            My Properties
+        </a>
+
+
+        <a
+            href="{% url 'owner_rental_requests' %}"
+        >
+            Rental Requests
+        </a>
+
+        <a
+            href="{% url 'owner_maintenance_requests' %}"
+        >
+            Maintenance Requests
+        </a>
+
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+
+        <a
+            href="{% url 'logout' %}"
+            class="logout-link"
+        >
+            Logout
+        </a>
+
+
+    </div>
+
+
+</aside>
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<main class="main-content">
+
+
+    <!-- ================= WELCOME ================= -->
+
+    <section class="welcome-panel">
+
+        <div class="welcome-copy">
+
+            <p class="welcome-eyebrow">
+                Owner Dashboard
+            </p>
+
+            <h1>
+                Welcome back, {{ request.user.first_name|default:request.user.username }}
+            </h1>
+
+        </div>
+
+        <div class="welcome-meta">
+
+            <div>
+                <span>Email</span>
+                <strong>{{ request.user.email }}</strong>
+            </div>
+
+            <div>
+                <span>Role</span>
+                <strong>{{ request.user.role }}</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= PROPERTY STATISTICS ================= -->
+
+    <h2>
+        Property Statistics
+    </h2>
+
+
+    <div class="dashboard-stats">
+
+
+        <!-- TOTAL PROPERTIES -->
+
+        <div class="stat-card">
+
+            <h3>
+                Total Properties
+            </h3>
+
+            <p>
+                {{ total_properties }}
+            </p>
+
+        </div>
+
+
+        <!-- AVAILABLE PROPERTIES -->
+
+        <div class="stat-card">
+
+            <h3>
+                Available Properties
+            </h3>
+
+            <p>
+                {{ available_properties }}
+            </p>
+
+        </div>
+
+
+        <!-- RENTED PROPERTIES -->
+
+        <div class="stat-card">
+
+            <h3>
+                Rented Properties
+            </h3>
+
+            <p>
+                {{ rented_properties }}
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+
+    <hr>
+
+
+
+    <!-- ================= RENTAL REQUEST STATISTICS ================= -->
+
+    <h2>
+        Rental Request Statistics
+    </h2>
+
+
+    <div class="dashboard-stats">
+
+
+        <!-- PENDING REQUESTS -->
+
+        <div class="stat-card">
+
+            <h3>
+                Pending Requests
+            </h3>
+
+            <p>
+                {{ pending_requests }}
+            </p>
+
+        </div>
+
+
+        <!-- APPROVED REQUESTS -->
+
+        <div class="stat-card">
+
+            <h3>
+                Approved Requests
+            </h3>
+
+            <p>
+                {{ approved_requests }}
+            </p>
+
+        </div>
+
+
+        <!-- REJECTED REQUESTS -->
+
+        <div class="stat-card">
+
+            <h3>
+                Rejected Requests
+            </h3>
+
+            <p>
+                {{ rejected_requests }}
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+
+    <hr>
+
+<!-- ================= PROPERTY PERFORMANCE ================= -->
+
+<h2>
+    Property Performance
+</h2>
+
+
+<div class="property-performance">
+
+
+    {% for property in properties %}
+
+
+        <div class="property-performance-card">
+
+
+            <div class="property-performance-header">
+
+                <h3>
+                    {{ property.title }}
+                </h3>
+
+                <span class="status-badge status-{{ property.status|lower }}">
+                    {{ property.get_status_display }}
+                </span>
+
+            </div>
+
+
+            <p>
+                {{ property.city }}
+            </p>
+
+
+            <p>
+                ₹{{ property.rent }}
+            </p>
+
+
+            <p>
+                Rental Requests:
+                <strong>
+                    {{ property.rental_requests.count }}
+                </strong>
+            </p>
+
+
+        </div>
+
+
+    {% empty %}
+
+
+        <p>
+            You have not added any properties yet.
+        </p>
+
+
+    {% endfor %}
+
+
+</div>
+
+
+<hr>
+
+
+</div>
+
+</body>
+
+</html>

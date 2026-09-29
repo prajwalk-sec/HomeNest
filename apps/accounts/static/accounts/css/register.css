@@ -1,0 +1,692 @@
+/* ================================================================
+   HomeNest — register.css
+   Sibling of login.css. Identical design tokens and base rules.
+   Adds: .btn-ghost, .btn-primary-sm, .form-grid, select styling.
+   File: apps/accounts/static/accounts/css/register.css
+   ================================================================ */
+
+/* ── Design Tokens (verbatim from home.css design system) ────── */
+:root {
+  /* Brand */
+  --navy:           #0F2240;
+  --navy-light:     #1a3660;
+  --amber:          #E8793A;
+  --amber-dark:     #d0612a;
+  --amber-glow:     #f0a573;
+
+  /* Backgrounds */
+  --bg-card:        #FFFFFF;
+  --bg-input:       #fafbff;
+  --bg-navbar:      rgba(255, 255, 255, 0.92);
+
+  /* Text */
+  --text-heading:   #0F2240;
+  --text-body:      #1c2b3a;
+  --text-slate:     #647B9E;
+  --text-muted:     #8a99b3;
+
+  /* Borders */
+  --border-nav:     rgba(15, 34, 64, 0.08);
+  --border-card:    rgba(15, 34, 64, 0.07);
+  --border-input:   rgba(15, 34, 64, 0.14);
+  --border-input-h: rgba(15, 34, 64, 0.30);
+
+  /* Shadows */
+  --shadow-lift:    0 16px 48px rgba(15, 34, 64, 0.14);
+  --shadow-nav:     0 4px 18px rgba(15, 34, 64, 0.07);
+  --shadow-btn:     0 4px 14px rgba(232, 121, 58, 0.32);
+  --shadow-input:   0 0 0 3px rgba(232, 121, 58, 0.13);
+
+  /* Radius */
+  --radius-card:    16px;
+  --radius-btn:     8px;
+  --radius-btn-sm:  7px;
+  --radius-input:   9px;
+  --radius-pill:    100px;
+  --radius-icon:    11px;
+
+  /* Typography */
+  --font-body:      'Inter', system-ui, sans-serif;
+  --font-heading:   'Playfair Display', serif;
+
+  /* Motion */
+  --ease:           0.22s ease;
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /*
+    Register page has more card content (6 fields vs 2).
+    Top-align on tall cards so the header never gets clipped.
+    Matches login.css background gradient language exactly.
+  */
+  align-items: flex-start;
+  padding: 28px 20px 48px;
+
+  background:
+    radial-gradient(ellipse at 72% 8%,  rgba(232,121,58,.10) 0%, transparent 52%),
+    radial-gradient(ellipse at 10% 90%, rgba(15, 34, 64,.08) 0%, transparent 50%),
+    linear-gradient(158deg, #eef3fb 0%, #f5efe6 55%, #edf2ff 100%);
+}
+
+a   { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+button, input, select { font-family: inherit; }
+
+/* ================================================================
+   PAGE WRAPPER
+   ================================================================ */
+.auth-page {
+  width: 100%;
+  max-width: 1060px;       /* identical to login.css */
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ================================================================
+   HEADER / NAVBAR
+   — Identical to login.css, extended for two nav buttons
+   ================================================================ */
+.auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 22px;
+  background: var(--bg-navbar);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-nav);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-nav);
+  position: sticky;
+  top: 20px;
+  z-index: 10;
+}
+
+/* Logo */
+.header-brand { display: flex; align-items: center; }
+
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.2px;
+  transition: opacity var(--ease);
+}
+.nav-logo:hover { opacity: 0.82; }
+
+.logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-icon);
+  background: rgba(232, 121, 58, 0.12);
+  color: var(--amber);
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+/* Nav action row */
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── .btn-ghost (NEW for register — "Back to Home") ─────────── */
+/* Matches home.css .btn-ghost: navy text, white bg, bordered     */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--border-input);
+  background: var(--bg-card);
+  color: var(--navy);
+  font-size: 0.87rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color var(--ease), background var(--ease);
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  border-color: var(--navy);
+  background: rgba(15, 34, 64, 0.04);
+}
+
+/* ── .btn-primary-sm (NEW for register — "Login" button) ─────── */
+/* Matches home.css .btn-primary-sm exactly: amber bg, white text  */
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: var(--radius-btn-sm);
+  border: none;
+  background: var(--amber);
+  color: #fff;
+  font-size: 0.87rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--ease), transform var(--ease);
+  cursor: pointer;
+}
+.btn-primary-sm:hover {
+  background: var(--amber-dark);
+  transform: translateY(-1px);
+}
+.btn-primary-sm:active { transform: translateY(0); }
+
+/* ================================================================
+   MAIN SHELL — two-column split (identical to login.css)
+   Register card is taller, so shell aligns to start not center
+   ================================================================ */
+.auth-shell {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  align-items: start;       /* ← start (not center) — card is tall */
+  gap: 52px;
+  padding-top: 8px;
+}
+
+/* ================================================================
+   LEFT — HERO PANEL (identical to login.css)
+   ================================================================ */
+.auth-hero {
+  padding: 16px 0 0;
+  position: sticky;
+  top: 100px;               /* sticks in viewport as user scrolls tall card */
+}
+
+/* Eyebrow pill */
+.eyebrow {
+  display: inline-block;
+  background: rgba(232, 121, 58, 0.12);
+  color: var(--amber-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  padding: 6px 15px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(232, 121, 58, 0.24);
+  margin-bottom: 22px;
+}
+
+/* H1 */
+.auth-hero h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 3.4vw, 3.3rem);
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.13;
+  letter-spacing: -0.9px;
+  max-width: 500px;
+  margin-bottom: 24px;
+}
+
+/* ── Perks list — register-only left-panel content ───────────── */
+/* Gives the left panel purpose on a registration page            */
+.register-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.perk-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.perk-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.pi-amber { background: rgba(232,121,58,.12); color: var(--amber); }
+.pi-navy  { background: rgba(15,34,64,.08);   color: var(--navy);  }
+.pi-green { background: rgba(4,120,87,.10);   color: #047857;      }
+.pi-blue  { background: rgba(31,95,184,.10);  color: #1f5fb8;      }
+
+.perk-text strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.perk-text span {
+  font-size: 0.80rem;
+  color: var(--text-slate);
+  line-height: 1.5;
+}
+
+/* ── Stat strip ──────────────────────────────────────────────── */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  margin-top: 32px;
+  padding: 18px 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(15, 34, 64, 0.08);
+  width: fit-content;
+  gap: 0;
+}
+.h-stat {
+  text-align: center;
+  padding: 0 20px;
+}
+.h-stat:first-child { padding-left: 0; }
+.h-stat:last-child  { padding-right: 0; }
+
+.h-stat-num {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+.h-stat-label {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--text-slate);
+  font-weight: 500;
+  margin-top: 4px;
+}
+.h-stat-sep {
+  width: 1px;
+  height: 30px;
+  background: var(--border-input);
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   RIGHT — AUTH CARD (identical to login.css)
+   ================================================================ */
+.auth-container { width: 100%; }
+
+.auth-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lift);
+  padding: 36px 32px;
+  overflow: hidden;
+}
+
+/* Amber top accent bar */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--amber) 0%, var(--amber-glow) 100%);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+/* Decorative bottom-right radial circle */
+.auth-card::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,121,58,.06) 0%, transparent 70%);
+  bottom: -50px;
+  right: -50px;
+  pointer-events: none;
+}
+
+/* Badge pill */
+.auth-badge {
+  display: inline-block;
+  background: rgba(15, 34, 64, 0.06);
+  color: var(--text-slate);
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
+
+/* Card H2 */
+.auth-card h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 2.2vw, 2rem);   /* slightly smaller — more fields below */
+  font-weight: 800;
+  color: var(--text-heading);
+  letter-spacing: -0.5px;
+  line-height: 1.18;
+  margin-bottom: 6px;
+}
+
+/* Subtitle */
+.auth-subtitle {
+  font-size: 0.92rem;
+  color: var(--text-slate);
+  line-height: 1.65;
+  margin-bottom: 22px;               /* tighter than login — more form below */
+}
+
+/* ── Django Message Banner ─────────────────────────────────── */
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 18px;
+  padding: 11px 14px;
+  border-radius: var(--radius-input);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  background: rgba(232, 121, 58, 0.08);
+  border: 1px solid rgba(232, 121, 58, 0.22);
+  color: var(--amber-dark);
+}
+.message.error {
+  background: #fff3f3;
+  border-color: rgba(185,28,28,.18);
+  color: #b91c1c;
+}
+.message.success {
+  background: #f0fdf6;
+  border-color: rgba(4,120,87,.18);
+  color: #047857;
+}
+
+/* ================================================================
+   FORM — including .form-grid (NEW for register)
+   ================================================================ */
+
+/* ── .form-grid: two-column layout for First / Last name ────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;      /* column gap only — row gap handled by .form-group margin */
+}
+
+/* Every field row */
+.form-group {
+  margin-bottom: 16px;    /* tighter than login (18px) — 6 fields need breathing room */
+}
+
+/* Label */
+.form-group label {
+  display: block;
+  font-size: 0.77rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 6px;
+  letter-spacing: 0.15px;
+}
+
+/* ── Input ───────────────────────────────────────────────────── */
+.form-group input {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--border-input);
+  border-radius: var(--radius-input);
+  background: var(--bg-input);
+  color: var(--text-heading);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition:
+    border-color var(--ease),
+    box-shadow   var(--ease),
+    background   var(--ease);
+  appearance: none;
+}
+.form-group input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.form-group input:hover  { border-color: var(--border-input-h); }
+.form-group input:focus  {
+  outline: none;
+  border-color: var(--amber);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-input);
+}
+
+/* ── Select (NEW — role dropdown) ───────────────────────────── */
+/* Styled identically to input; custom arrow replaces OS default  */
+.form-group select {
+  width: 100%;
+  padding: 10px 38px 10px 13px;   /* right room for custom arrow */
+  border: 1.5px solid var(--border-input);
+  border-radius: var(--radius-input);
+  background-color: var(--bg-input);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a99b3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  color: var(--text-heading);
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    border-color var(--ease),
+    box-shadow   var(--ease),
+    background-color var(--ease);
+}
+.form-group select:hover  { border-color: var(--border-input-h); }
+.form-group select:focus  {
+  outline: none;
+  border-color: var(--amber);
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-input);
+}
+/* Placeholder option (value="") rendered in muted colour */
+.form-group select option[value=""] { color: var(--text-muted); }
+.form-group select option           { color: var(--text-heading); }
+
+/* Field-level error text */
+.field-error {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #b91c1c;
+}
+
+/* ── Submit button (identical to login.css) ─────────────────── */
+.auth-button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 24px;
+  border: none;
+  border-radius: var(--radius-btn);
+  background: var(--amber);
+  color: #fff;
+  font-size: 0.97rem;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  transition:
+    background  var(--ease),
+    transform   var(--ease),
+    box-shadow  var(--ease);
+  margin-top: 8px;
+}
+.auth-button:hover {
+  background: var(--amber-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(232, 121, 58, 0.40);
+}
+.auth-button:active { transform: translateY(0); }
+
+/* ── Footer link row (identical to login.css) ─────────────── */
+.auth-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--text-slate);
+  line-height: 1.6;
+}
+.auth-footer a {
+  color: var(--amber);
+  font-weight: 700;
+  transition: color var(--ease);
+}
+.auth-footer a:hover { color: var(--amber-dark); }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+/* ── Tablet (≤ 900px) ── */
+@media (max-width: 900px) {
+  body {
+    padding: 20px 16px 36px;
+    align-items: flex-start;
+  }
+
+  .auth-header {
+    position: static;        /* un-stick on small screens */
+  }
+
+  .auth-shell {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .auth-hero {
+    text-align: center;
+    padding: 8px 0 0;
+    position: static;        /* un-stick hero on tablet */
+  }
+  .auth-hero h1 {
+    margin: 0 auto;
+    max-width: 460px;
+    font-size: clamp(2rem, 5vw, 2.6rem);
+  }
+
+  /* Perks row on tablet */
+  .register-perks {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .perk-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 12px rgba(15,34,64,.06);
+    width: calc(50% - 6px);
+    min-width: 140px;
+    gap: 8px;
+  }
+  .perk-text { text-align: center; }
+
+  .hero-stats {
+    margin: 24px auto 0;
+  }
+
+  .auth-container {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* ── Mobile (≤ 640px) ── */
+@media (max-width: 640px) {
+  .auth-header { padding: 12px 16px; }
+
+  .nav-logo  { font-size: 1.2rem; }
+  .logo-icon { width: 32px; height: 32px; font-size: 0.85rem; }
+
+  .btn-ghost       { font-size: 0.82rem; padding: 8px 13px; }
+  .btn-primary-sm  { font-size: 0.82rem; padding: 8px 14px; }
+
+  .auth-hero h1 { font-size: 1.95rem; }
+
+  /* Collapse two-column name grid to single column */
+  .form-grid { grid-template-columns: 1fr; gap: 0; }
+
+  .perk-item { width: 100%; max-width: 320px; }
+
+  .hero-stats {
+    width: 100%;
+    justify-content: space-around;
+    padding: 14px 16px;
+  }
+  .h-stat        { padding: 0 10px; }
+  .h-stat-num    { font-size: 1.25rem; }
+
+  .auth-container { max-width: 100%; }
+  .auth-card      { padding: 28px 20px; }
+  .auth-card h2   { font-size: 1.6rem; }
+}
+
+/* ── Small mobile (≤ 400px) ── */
+@media (max-width: 400px) {
+  body { padding: 14px 12px 28px; }
+  .auth-page { gap: 12px; }
+  .auth-card { padding: 24px 16px; }
+
+  /* Stack both nav buttons vertically and hide ghost on tiny screens */
+  .auth-actions { gap: 6px; }
+  .btn-ghost { display: none; }
+  .btn-primary-sm { padding: 8px 16px; }
+
+  .h-stat-sep { display: none; }
+  .hero-stats { gap: 12px; flex-wrap: wrap; }
+  .h-stat     { padding: 0 8px; }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+  }
+}
