@@ -161,7 +161,7 @@ The application provides dashboard information such as:
 
 ### ℹ️ About HomeNest
 
-<img width="1613" height="805" alt="HomeNest About Page" src="https://github.com/user-attachments/assets/68779333-02f9-4a5a-ad52-7cc0d5ce19d7" />
+<img width="1552" height="837" alt="image" src="https://github.com/user-attachments/assets/ea287561-6089-4a3e-a2c0-786688a7100b" />
 
 ### ⚙️ How It Works
 
