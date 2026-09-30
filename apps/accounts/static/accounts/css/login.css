@@ -409,6 +409,15 @@ button, input, select { font-family: inherit; }
 }
 
 /* ── Submit Button ─────────────────────────────────────────── */
+.forgot-password {
+  display: block;
+  margin-top: 8px;
+  color: var(--amber-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: right;
+}
+
 .auth-button {
   width: 100%;
   display: inline-flex;

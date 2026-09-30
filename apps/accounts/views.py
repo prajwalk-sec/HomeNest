@@ -1,21 +1,79 @@
+# ============================================================
+# DJANGO AUTHENTICATION
+# ============================================================
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.shortcuts import render, redirect
+
+
+# ============================================================
+# APPLICATION IMPORTS
+# ============================================================
+
+# Property model used by the owner dashboard.
 from apps.properties.models import Property
-from .models import User
+
+# Rental model used by the owner dashboard.
 from apps.tenants.models import Rental
 
-def register_view(request):
+# Custom User model.
+from .models import User
 
+# Custom decorator that allows only OWNER users.
+from apps.accounts.decorators import owner_required
+
+
+# ============================================================
+# USER REGISTRATION
+# ============================================================
+
+def register_view(request):
+    """
+    Creates a new HomeNest user account.
+
+    Only OWNER and TENANT roles are allowed.
+    """
+
+    # Process the registration form.
     if request.method == "POST":
 
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
-        role = request.POST.get("role")
+        # Get values submitted from the registration form.
+        first_name = request.POST.get(
+            "first_name",
+            ""
+        ).strip()
+
+        last_name = request.POST.get(
+            "last_name",
+            ""
+        ).strip()
+
+        email = request.POST.get(
+            "email",
+            ""
+        ).strip().lower()
+
+        password = request.POST.get(
+            "password",
+            ""
+
+        )
+
+        confirm_password = request.POST.get(
+            "confirm_password",
+            ""
+        )
+
+        role = request.POST.get(
+            "role",
+            ""
+        ).strip().upper()
+
+        # ----------------------------------------------------
+        # REQUIRED FIELD VALIDATION
+        # ----------------------------------------------------
 
         if not all([
             first_name,
@@ -25,24 +83,63 @@ def register_view(request):
             confirm_password,
             role,
         ]):
-            messages.error(request, "All fields are required.")
-            return redirect("register")
-
-        if role not in ["OWNER", "TENANT"]:
-            messages.error(request, "Invalid role selected.")
-            return redirect("register")
-
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match.")
-            return redirect("register")
-
-        if User.objects.filter(email=email).exists():
             messages.error(
                 request,
-                "An account with this email already exists."
+                "All fields are required.",
             )
+
             return redirect("register")
 
+        # ----------------------------------------------------
+        # ROLE VALIDATION
+        # ----------------------------------------------------
+
+        # HomeNest has only two application roles:
+        # OWNER and TENANT.
+        if role not in ["OWNER", "TENANT"]:
+            messages.error(
+                request,
+                "Invalid role selected.",
+            )
+
+            return redirect("register")
+
+        # ----------------------------------------------------
+        # PASSWORD VALIDATION
+        # ----------------------------------------------------
+
+        if password != confirm_password:
+            messages.error(
+                request,
+                "Passwords do not match.",
+            )
+
+            return redirect("register")
+
+        # ----------------------------------------------------
+        # DUPLICATE EMAIL CHECK
+        # ----------------------------------------------------
+
+        if User.objects.filter(
+            email=email
+        ).exists():
+
+            messages.error(
+                request,
+                "An account with this email already exists.",
+            )
+
+            return redirect("register")
+
+        # ----------------------------------------------------
+        # CREATE USER
+        # ----------------------------------------------------
+
+        # create_user() automatically hashes the password.
+        #
+        # We use the email as the username because the
+        # current authentication flow authenticates using
+        # username=email.
         User.objects.create_user(
             username=email,
             email=email,
@@ -52,75 +149,199 @@ def register_view(request):
             role=role,
         )
 
+        # Tell the user that registration was successful.
         messages.success(
             request,
-            "Account created successfully. Please login."
+            "Account created successfully. Please login.",
         )
 
         return redirect("login")
 
-    return render(request, "accounts/register.html")
+    # Display registration page for GET requests.
+    return render(
+        request,
+        "accounts/register.html",
+    )
 
+
+# ============================================================
+# USER LOGIN
+# ============================================================
 
 def login_view(request):
+    """
+    Authenticates a HomeNest user.
 
+    OWNER users are sent to the owner dashboard.
+    TENANT users are sent to the tenant dashboard.
+    """
+
+    # Process login form.
     if request.method == "POST":
 
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        email = request.POST.get(
+            "email",
+            ""
+        ).strip().lower()
 
+        password = request.POST.get(
+            "password",
+            ""
+        )
+
+        # Authenticate using Django's authentication system.
+        #
+        # username=email works because registration stores
+        # the user's email as the username.
         user = authenticate(
             request,
             username=email,
             password=password,
         )
 
+        # Authentication successful.
         if user is not None:
 
-            login(request, user)
+            # Create the authenticated session.
+            login(
+                request,
+                user,
+            )
 
+            # Redirect OWNER users.
             if user.role == "OWNER":
-                return redirect("owner_dashboard")
+                return redirect(
+                    "owner_dashboard"
+                )
 
-            elif user.role == "TENANT":
-                return redirect("tenant_dashboard")
+            # Redirect TENANT users.
+            if user.role == "TENANT":
+                return redirect(
+                    "tenant_dashboard"
+                )
 
+            # Safety fallback if an unexpected role exists.
             logout(request)
 
-            messages.error(request, "Invalid user role.")
+            messages.error(
+                request,
+                "Invalid user role.",
+            )
+
             return redirect("login")
 
-        messages.error(request, "Invalid email or password.")
+        # Authentication failed.
+        messages.error(
+            request,
+            "Invalid email or password.",
+        )
+
         return redirect("login")
 
-    return render(request, "accounts/login.html")
+    # Display login page for GET requests.
+    return render(
+        request,
+        "accounts/login.html",
+    )
 
+
+# ============================================================
+# LOGOUT
+# ============================================================
 
 @login_required
 def logout_view(request):
+    """
+    Logs the current user out of HomeNest.
+    """
 
+    # End the Django authentication session.
     logout(request)
 
-    messages.success(request, "You have been logged out successfully.")
+    # Show confirmation message.
+    messages.success(
+        request,
+        "You have been logged out successfully.",
+    )
 
     return redirect("login")
 
-@login_required
-def owner_dashboard(request):
-    if request.user.role != "OWNER":
-        return redirect("login")
 
+# ============================================================
+# OWNER DASHBOARD
+# ============================================================
+
+@owner_required
+def owner_dashboard(request):
+    """
+    Displays statistics and properties belonging to
+    the currently logged-in OWNER.
+    """
+
+    # Get the currently logged-in owner.
     owner = request.user
 
-    total_properties = Property.objects.filter(owner=owner).count()
-    available_properties = Property.objects.filter(owner=owner, status="AVAILABLE").count()
-    rented_properties = Property.objects.filter(owner=owner, status="RENTED").count()
+    # --------------------------------------------------------
+    # PROPERTY STATISTICS
+    # --------------------------------------------------------
 
-    pending_requests = Rental.objects.filter(property__owner=owner, status="PENDING").count()
-    approved_requests = Rental.objects.filter(property__owner=owner, status="APPROVED").count()
-    rejected_requests = Rental.objects.filter(property__owner=owner, status="REJECTED").count()
+    # Total number of properties owned by this user.
+    total_properties = Property.objects.filter(
+        owner=owner
+    ).count()
 
-    properties = Property.objects.filter(owner=owner).prefetch_related("rental_requests")
+    # Number of available properties.
+    available_properties = Property.objects.filter(
+        owner=owner,
+        status="AVAILABLE",
+    ).count()
+
+    # Number of rented properties.
+    rented_properties = Property.objects.filter(
+        owner=owner,
+        status="RENTED",
+    ).count()
+
+    # --------------------------------------------------------
+    # RENTAL REQUEST STATISTICS
+    # --------------------------------------------------------
+
+    # Pending rental requests.
+    pending_requests = Rental.objects.filter(
+        property__owner=owner,
+        status="PENDING",
+    ).count()
+
+    # Approved rental requests.
+    approved_requests = Rental.objects.filter(
+        property__owner=owner,
+        status="APPROVED",
+    ).count()
+
+    # Rejected rental requests.
+    rejected_requests = Rental.objects.filter(
+        property__owner=owner,
+        status="REJECTED",
+    ).count()
+
+    # --------------------------------------------------------
+    # OWNER PROPERTIES
+    # --------------------------------------------------------
+
+    # Retrieve only properties belonging to this owner.
+    #
+    # prefetch_related("rental_requests") reduces additional
+    # database queries when rental requests are accessed
+    # from the dashboard template.
+    properties = Property.objects.filter(
+        owner=owner
+    ).prefetch_related(
+        "rental_requests"
+    )
+
+    # --------------------------------------------------------
+    # TEMPLATE CONTEXT
+    # --------------------------------------------------------
 
     context = {
         "total_properties": total_properties,
@@ -132,37 +353,9 @@ def owner_dashboard(request):
         "properties": properties,
     }
 
-    return render(request, "owner/dashboard.html", context)
-
-
-@login_required
-def approve_rental_request(request, rental_id):
-
-    if request.user.role != "OWNER":
-        return redirect("login")
-
-    rental = Rental.objects.get(
-        id=rental_id,
-        property__owner=request.user
+    return render(
+        request,
+        "owner/dashboard.html",
+        context,
     )
 
-    rental.status = "APPROVED"
-    rental.save()
-
-    return redirect("owner_rental_requests")
-
-@login_required
-def reject_rental_request(request, rental_id):
-
-    if request.user.role != "OWNER":
-        return redirect("login")
-
-    rental = Rental.objects.get(
-        id=rental_id,
-        property__owner=request.user
-    )
-
-    rental.status = "REJECTED"
-    rental.save()
-
-    return redirect("owner_rental_requests")
