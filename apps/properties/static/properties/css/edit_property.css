@@ -12,12 +12,6 @@ body {
     line-height: 1.5;
 }
 
-.main-content.admin-main {
-    width: 100%;
-    max-width: none;
-    padding: 32px 28px 60px;
-}
-
 .admin-shell {
     width: 100%;
 }
@@ -175,10 +169,6 @@ body {
 }
 
 @media (max-width: 768px) {
-    .main-content.admin-main {
-        padding: 24px 18px 42px;
-    }
-
     .edit-card {
         padding: 22px 18px;
     }

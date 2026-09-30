@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 # ============================================================
 
 from .models import Tenant, Rental
-from apps.properties.models import Property
+from apps.properties.models import MaintenanceRequest, Property
 
 
 # ============================================================
@@ -38,11 +38,22 @@ def tenant_dashboard(request):
         user=request.user
     )
 
+    maintenance_requests = MaintenanceRequest.objects.filter(
+        tenant=request.user
+    ).select_related(
+        "property"
+    ).prefetch_related(
+        "history__updated_by",
+    ).order_by(
+        "-created_at"
+    )
+
     return render(
         request,
         "tenants/dashboard.html",
         {
             "tenant": tenant,
+            "maintenance_requests": maintenance_requests,
         },
     )
 

@@ -73,6 +73,17 @@ body {
     font-weight: 500;
 }
 
+.alert[data-auto-dismiss="true"] {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.alert[data-auto-dismiss="true"].is-dismissing {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
 .alert-success {
     background-color: #d1fae5;
     color: #065f46;
@@ -216,6 +227,42 @@ body {
 
 .request-actions form {
     margin: 0;
+}
+
+.maintenance-update-form {
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(15, 34, 64, 0.08);
+}
+
+.maintenance-update-form label {
+    color: #1f2937;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.maintenance-update-form select,
+.maintenance-update-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(15, 34, 64, 0.14);
+    border-radius: 8px;
+    background: #fff;
+    color: #1c2b3a;
+    font: inherit;
+}
+
+.maintenance-update-form button {
+    justify-self: start;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #0f2240;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .approve-btn, .reject-btn {
@@ -486,4 +533,43 @@ hr {
 .back-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 22px rgba(232, 121, 58, 0.28);
+}
+
+.maintenance-history {
+    margin-top: 20px;
+}
+
+.maintenance-history ol {
+    display: grid;
+    gap: 12px;
+    margin: 12px 0 0;
+    padding: 0 0 0 20px;
+}
+
+.maintenance-history li {
+    padding: 12px 14px;
+    border-left: 2px solid rgba(232, 121, 58, 0.5);
+    background: #f8fafc;
+}
+
+.history-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.history-heading time,
+.history-actor {
+    color: #647b9e;
+    font-size: 0.82rem;
+}
+
+.history-actor {
+    margin: 4px 0;
+}
+
+.maintenance-closed {
+    margin-top: 16px;
+    color: #647b9e;
+    font-weight: 600;
 }

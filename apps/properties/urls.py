@@ -91,6 +91,12 @@ urlpatterns = [
         name="owner_maintenance_requests",
     ),
 
+    path(
+        "maintenance-requests/<int:request_id>/update/",
+        views.update_maintenance_request,
+        name="update_maintenance_request",
+    ),
+
 
     # ========================================================
     # CREATE MAINTENANCE REQUEST
@@ -100,6 +106,12 @@ urlpatterns = [
         "maintenance/create/",
         views.create_maintenance_request,
         name="create_maintenance_request",
+    ),
+
+    path(
+        "maintenance-requests/<int:request_id>/delete/",
+        views.delete_maintenance_request,
+        name="delete_maintenance_request",
     ),
 ]
 

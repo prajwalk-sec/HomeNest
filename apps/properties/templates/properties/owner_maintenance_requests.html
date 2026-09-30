@@ -9,9 +9,10 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'properties/css/owner_rental_requests.css' %}">
+    <link rel="stylesheet" href="{% static 'properties/css/owner_maintenance_requests.css' %}">
 </head>
 
-<body>
+<body class="maintenance-page">
 
     <div class="dashboard-container">
         <aside class="sidebar">
@@ -42,7 +43,7 @@
                     {% if messages %}
                         <div class="messages-container">
                             {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }}">
+                                <div class="alert alert-{{ message.tags }}"{% if message.tags == "success" %} data-auto-dismiss="true"{% endif %}>
                                     {{ message }}
                                 </div>
                             {% endfor %}
@@ -77,8 +78,41 @@
                                     <p><strong>Status:</strong> {{ request.status }}</p>
                                     <p><strong>Description:</strong> {{ request.description }}</p>
 
-                                    {% if request.owner_note %}
-                                        <p><strong>Owner Note:</strong> {{ request.owner_note }}</p>
+                                    <section class="maintenance-history">
+                                        <h3>Update History</h3>
+                                        <ol>
+                                            {% for entry in request.history.all %}
+                                                <li>
+                                                    <div class="history-heading">
+                                                        <strong>{{ entry.get_status_display }}</strong>
+                                                        <time datetime="{{ entry.updated_at|date:'c' }}">{{ entry.updated_at|date:"d M Y, h:i A" }}</time>
+                                                    </div>
+                                                    <p class="history-actor">
+                                                        {% if entry.updated_by %}
+                                                            {{ entry.updated_by.get_full_name|default:entry.updated_by.username }}
+                                                        {% else %}
+                                                            Former user
+                                                        {% endif %}
+                                                    </p>
+                                                    {% if entry.owner_note %}<p>{{ entry.owner_note }}</p>{% endif %}
+                                                </li>
+                                            {% empty %}
+                                                <li>History is not available.</li>
+                                            {% endfor %}
+                                        </ol>
+                                    </section>
+
+                                    {% if request.status != "RESOLVED" and request.status != "REJECTED" %}
+                                        <form method="post" action="{% url 'update_maintenance_request' request.id %}" class="maintenance-update-form">
+                                            {% csrf_token %}
+                                            <label for="status-{{ request.id }}">Update status</label>
+                                            {{ request.update_form.status }}
+                                            <label for="owner-note-{{ request.id }}">Reply to tenant</label>
+                                            {{ request.update_form.owner_note }}
+                                            <button type="submit" class="request-btn">Save Update</button>
+                                        </form>
+                                    {% else %}
+                                        <p class="maintenance-closed">This request is closed. Further updates are disabled.</p>
                                     {% endif %}
 
                                     <p class="request-date">
@@ -102,5 +136,6 @@
         </main>
     </div>
 
+    <script src="{% static 'properties/js/flash_messages.js' %}" defer></script>
 </body>
 </html>

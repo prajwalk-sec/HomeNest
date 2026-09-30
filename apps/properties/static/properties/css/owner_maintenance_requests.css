@@ -1,0 +1,191 @@
+body.maintenance-page {
+    background: #f4f6fb;
+    color: #1c2b3a;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+}
+
+.maintenance-page .container {
+    width: 100%;
+    max-width: 1180px;
+}
+
+.maintenance-page .container > h1 {
+    margin-bottom: 8px;
+    color: #0f2240;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 2.8vw, 2.5rem);
+    font-weight: 800;
+}
+
+.maintenance-page .subtitle {
+    margin-bottom: 28px;
+    color: #647b9e;
+    font-size: 1rem;
+}
+
+.maintenance-page .requests-container {
+    gap: 22px;
+}
+
+.maintenance-page .rental-card {
+    display: grid;
+    grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid rgba(15, 34, 64, 0.08);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(15, 34, 64, 0.08);
+}
+
+.maintenance-page .image-section {
+    width: 100%;
+    min-height: 100%;
+    background: #edf3ff;
+}
+
+.maintenance-page .property-image {
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    object-fit: cover;
+}
+
+.maintenance-page .no-image {
+    display: grid;
+    min-height: 280px;
+    place-items: center;
+    color: #647b9e;
+    font-weight: 600;
+}
+
+.maintenance-page .rental-content {
+    min-width: 0;
+    padding: 24px;
+}
+
+.maintenance-page .rental-content h2,
+.maintenance-page .rental-content h3 {
+    color: #0f2240;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.maintenance-page .rental-content h2 {
+    margin-bottom: 4px;
+    font-size: 1.35rem;
+}
+
+.maintenance-page .rental-content h3 {
+    margin: 20px 0 8px;
+    font-size: 1.05rem;
+}
+
+.maintenance-page .location,
+.maintenance-page .request-date {
+    color: #647b9e;
+}
+
+.maintenance-page .rental-content p {
+    color: #4d5d78;
+}
+
+.maintenance-page .rental-content strong {
+    color: #0f2240;
+}
+
+.maintenance-page .maintenance-history {
+    margin-top: 22px;
+    padding: 18px;
+    border: 1px solid rgba(15, 34, 64, 0.08);
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.maintenance-page .maintenance-history h3 {
+    margin: 0 0 12px;
+}
+
+.maintenance-page .maintenance-history ol {
+    gap: 10px;
+    margin-top: 0;
+}
+
+.maintenance-page .maintenance-history li {
+    border-left-color: #e8793a;
+    border-radius: 0 8px 8px 0;
+    background: #ffffff;
+}
+
+.maintenance-page .history-heading strong {
+    color: #0f2240;
+}
+
+.maintenance-page .maintenance-update-form {
+    margin-top: 20px;
+    padding-top: 18px;
+}
+
+.maintenance-page .maintenance-update-form select,
+.maintenance-page .maintenance-update-form textarea {
+    border-color: rgba(15, 34, 64, 0.12);
+    border-radius: 9px;
+    background: #fafbff;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.maintenance-page .maintenance-update-form select:focus,
+.maintenance-page .maintenance-update-form textarea:focus {
+    outline: none;
+    border-color: #1a3660;
+    box-shadow: 0 0 0 3px rgba(26, 54, 96, 0.1);
+}
+
+.maintenance-page .maintenance-update-form button {
+    padding: 10px 16px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #0f2240, #1a3660);
+    box-shadow: 0 8px 18px rgba(15, 34, 64, 0.12);
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.maintenance-page .maintenance-update-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(15, 34, 64, 0.18);
+}
+
+.maintenance-page .maintenance-closed {
+    margin-top: 18px;
+    color: #647b9e;
+}
+
+.maintenance-page .empty-message {
+    width: 100%;
+    padding: 42px 20px;
+    border: 1px dashed rgba(15, 34, 64, 0.12);
+    border-radius: 16px;
+    background: #ffffff;
+    color: #647b9e;
+    text-align: center;
+}
+
+.maintenance-page .empty-message h2 {
+    color: #0f2240;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+@media (max-width: 760px) {
+    .maintenance-page .rental-card {
+        grid-template-columns: 1fr;
+    }
+
+    .maintenance-page .property-image,
+    .maintenance-page .no-image {
+        height: 210px;
+        min-height: 210px;
+    }
+
+    .maintenance-page .rental-content {
+        padding: 20px;
+    }
+}

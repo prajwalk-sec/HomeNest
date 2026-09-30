@@ -88,6 +88,164 @@
     box-shadow: 0 12px 22px rgba(232, 121, 58, 0.24);
 }
 
+.messages-container {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #ecfdf5;
+    color: #047857;
+    font-weight: 600;
+}
+
+.alert[data-auto-dismiss="true"] {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.alert[data-auto-dismiss="true"].is-dismissing {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+.tenant-maintenance {
+    margin-top: 36px;
+}
+
+.tenant-maintenance-card {
+    margin-bottom: 16px;
+    padding: 22px;
+    border: 1px solid rgba(15, 34, 64, 0.08);
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(15, 34, 64, 0.06);
+}
+
+.tenant-maintenance-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.tenant-maintenance-heading h3 {
+    color: #0f2240;
+    font-size: 1.05rem;
+}
+
+.tenant-maintenance-card dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.tenant-maintenance-card dt {
+    color: #647b9e;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.tenant-maintenance-card dd {
+    margin: 4px 0 0;
+    color: #1c2b3a;
+    font-weight: 600;
+}
+
+.maintenance-status {
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-in_progress { background: #eff6ff; color: #1d4ed8; }
+.status-resolved { background: #ecfdf5; color: #047857; }
+.status-rejected { background: #fef2f2; color: #b91c1c; }
+
+.maintenance-pending {
+    margin-top: 16px;
+    color: #9a3412;
+    font-weight: 600;
+}
+
+.maintenance-reply {
+    margin-top: 16px;
+    padding: 14px;
+    border-left: 3px solid #e8793a;
+    background: #f8fafc;
+}
+
+.maintenance-reply p {
+    margin-top: 6px;
+}
+
+.maintenance-history {
+    margin-top: 18px;
+}
+
+.maintenance-history h4 {
+    margin-bottom: 10px;
+    color: #0f2240;
+}
+
+.maintenance-history ol {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding-left: 20px;
+}
+
+.maintenance-history li {
+    padding: 11px 13px;
+    border-left: 2px solid rgba(232, 121, 58, 0.5);
+    background: #f8fafc;
+}
+
+.history-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.history-heading time,
+.history-actor {
+    color: #647b9e;
+    font-size: 0.82rem;
+}
+
+.history-actor {
+    margin: 4px 0;
+}
+
+.maintenance-empty {
+    color: #647b9e;
+}
+
+.maintenance-delete-btn {
+    margin-top: 16px;
+    padding: 9px 14px;
+    border: 1px solid #b91c1c;
+    border-radius: 8px;
+    background: #fff;
+    color: #b91c1c;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.maintenance-delete-btn:hover {
+    background: #fef2f2;
+}
+
 @media (max-width: 900px) {
     .main-content {
         padding: 24px 20px 40px;

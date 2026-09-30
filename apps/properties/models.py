@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class Property(models.Model):
@@ -89,7 +90,7 @@ class MaintenanceRequest(models.Model):
     STATUS_CHOICES = (
         ("PENDING", "Pending"),
         ("IN_PROGRESS", "In Progress"),
-        ("COMPLETED", "Completed"),
+        ("RESOLVED", "Resolved"),
         ("REJECTED", "Rejected"),
     )
 
@@ -149,3 +150,32 @@ class MaintenanceRequest(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.property.title}"
+
+
+class MaintenanceRequestHistory(models.Model):
+    maintenance_request = models.ForeignKey(
+        MaintenanceRequest,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="history",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=MaintenanceRequest.STATUS_CHOICES,
+    )
+    owner_note = models.TextField(blank=True)
+    updated_at = models.DateTimeField(default=timezone.now)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="maintenance_request_updates",
+    )
+
+    class Meta:
+        ordering = ["updated_at", "pk"]
+
+    def __str__(self):
+        return f"{self.get_status_display()} update"

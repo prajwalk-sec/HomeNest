@@ -4,7 +4,10 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 
 # ============================================================
@@ -17,13 +20,13 @@ from apps.tenants.models import Rental
 
 # Custom decorator that allows only OWNER users
 # to access owner-only views.
-from apps.accounts.decorators import owner_required
+from apps.accounts.decorators import owner_required, tenant_required
 
 # Form used to create maintenance requests.
-from .forms import MaintenanceRequestForm
+from .forms import MaintenanceRequestForm, OwnerMaintenanceUpdateForm
 
 # Models used by this application.
-from .models import MaintenanceRequest, Property
+from .models import MaintenanceRequest, MaintenanceRequestHistory, Property
 
 
 # ============================================================
@@ -252,9 +255,22 @@ def owner_maintenance_requests(request):
     ).select_related(
         "tenant",
         "property",
+    ).prefetch_related(
+        "history__updated_by",
     ).order_by(
         "-created_at"
     )
+
+    for maintenance_request in maintenance_requests:
+        maintenance_request.update_form = OwnerMaintenanceUpdateForm(
+            instance=maintenance_request,
+        )
+        maintenance_request.update_form.fields["status"].widget.attrs["id"] = (
+            f"status-{maintenance_request.id}"
+        )
+        maintenance_request.update_form.fields["owner_note"].widget.attrs["id"] = (
+            f"owner-note-{maintenance_request.id}"
+        )
 
     return render(
         request,
@@ -263,6 +279,53 @@ def owner_maintenance_requests(request):
             "maintenance_requests": maintenance_requests,
         },
     )
+
+
+@owner_required
+def update_maintenance_request(request, request_id):
+    if request.method != "POST":
+        return redirect("owner_maintenance_requests")
+
+    maintenance_request = get_object_or_404(
+        MaintenanceRequest,
+        id=request_id,
+        property__owner=request.user,
+    )
+    if maintenance_request.status in {"RESOLVED", "REJECTED"}:
+        messages.error(request, "This maintenance request is already closed.")
+        return redirect("owner_maintenance_requests")
+
+    form = OwnerMaintenanceUpdateForm(
+        request.POST,
+        instance=maintenance_request,
+    )
+
+    if form.is_valid():
+        new_status = form.cleaned_data["status"]
+        new_note = form.cleaned_data["owner_note"].strip()
+        status_changed = new_status != maintenance_request.status
+
+        if status_changed or new_note:
+            with transaction.atomic():
+                maintenance_request.status = new_status
+                if new_note:
+                    maintenance_request.owner_note = new_note
+                if new_status in {"RESOLVED", "REJECTED"}:
+                    maintenance_request.completed_at = timezone.now()
+                maintenance_request.save()
+                MaintenanceRequestHistory.objects.create(
+                    maintenance_request=maintenance_request,
+                    status=maintenance_request.status,
+                    owner_note=new_note,
+                    updated_by=request.user,
+                )
+            messages.success(request, "Maintenance request update saved.")
+        else:
+            messages.info(request, "No maintenance changes were submitted.")
+    else:
+        messages.error(request, "Choose a valid next status and try again.")
+
+    return redirect("owner_maintenance_requests")
 
 
 # ============================================================
@@ -384,7 +447,7 @@ def reject_rental_request(request, rental_id):
 # CREATE MAINTENANCE REQUEST
 # ============================================================
 
-@login_required
+@tenant_required
 def create_maintenance_request(request):
     """
     Allows a logged-in TENANT with an approved rental
@@ -441,13 +504,19 @@ def create_maintenance_request(request):
             maintenance_request.property = property_obj
             maintenance_request.tenant = request.user
 
-            # Now save the completed object.
-            maintenance_request.save()
+            with transaction.atomic():
+                maintenance_request.save()
+                MaintenanceRequestHistory.objects.create(
+                    maintenance_request=maintenance_request,
+                    status=maintenance_request.status,
+                    owner_note="",
+                    updated_by=request.user,
+                )
 
             # Tell the tenant that the request was created.
             messages.success(
                 request,
-                "Maintenance request submitted successfully.",
+                "Your maintenance request has been received successfully.",
             )
 
             # Return to the tenant dashboard.
@@ -466,3 +535,16 @@ def create_maintenance_request(request):
             "property": property_obj,
         },
     )
+
+
+@tenant_required
+@require_POST
+def delete_maintenance_request(request, request_id):
+    maintenance_request = get_object_or_404(
+        MaintenanceRequest,
+        id=request_id,
+        tenant=request.user,
+    )
+    maintenance_request.delete()
+    messages.success(request, "Your maintenance request was removed.")
+    return redirect("tenant_dashboard")

@@ -60,6 +60,14 @@
 
     <main class="main-content">
 
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <p class="alert alert-{{ message.tags }}"{% if message.tags == "success" %} data-auto-dismiss="true"{% endif %}>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
         <!-- Welcome Section -->
 
         <section class="welcome-panel">
@@ -138,7 +146,7 @@
                 </h3>
 
                 <p>
-                    {{ maintenance_requests|default:0 }}
+                    {{ maintenance_requests|length }}
                 </p>
 
             </div>
@@ -174,10 +182,10 @@
 
 
             <a
-                href="#"
+                href="#maintenance-requests"
                 class="action-btn"
             >
-                My Profile
+                My Maintenance Requests
             </a>
 
 
@@ -190,10 +198,62 @@
 
         </div>
 
+        <section class="tenant-maintenance" id="maintenance-requests">
+            <h2>My Maintenance Requests</h2>
+            {% for maintenance_request in maintenance_requests %}
+                <article class="tenant-maintenance-card">
+                    <div class="tenant-maintenance-heading">
+                        <h3>{{ maintenance_request.title }}</h3>
+                        <span class="maintenance-status status-{{ maintenance_request.status|lower }}">
+                            {{ maintenance_request.get_status_display }}
+                        </span>
+                    </div>
+                    <dl>
+                        <div><dt>Property</dt><dd>{{ maintenance_request.property.title }}</dd></div>
+                        <div><dt>Priority</dt><dd>{{ maintenance_request.get_priority_display }}</dd></div>
+                        <div><dt>Submitted</dt><dd>{{ maintenance_request.created_at|date:"d M Y, h:i A" }}</dd></div>
+                    </dl>
+                    {% if maintenance_request.status == "PENDING" %}
+                        <p class="maintenance-pending">Your maintenance request is currently pending review.</p>
+                    {% endif %}
+                    <div class="maintenance-history">
+                        <h4>Update History</h4>
+                        <ol>
+                            {% for entry in maintenance_request.history.all %}
+                                <li>
+                                    <div class="history-heading">
+                                        <strong>{{ entry.get_status_display }}</strong>
+                                        <time datetime="{{ entry.updated_at|date:'c' }}">{{ entry.updated_at|date:"d M Y, h:i A" }}</time>
+                                    </div>
+                                    <p class="history-actor">
+                                        {% if entry.updated_by %}
+                                            {{ entry.updated_by.get_full_name|default:entry.updated_by.username }}
+                                        {% else %}
+                                            Former user
+                                        {% endif %}
+                                    </p>
+                                    {% if entry.owner_note %}<p>{{ entry.owner_note }}</p>{% endif %}
+                                </li>
+                            {% empty %}
+                                <li>History is not available.</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    <form method="post" action="{% url 'delete_maintenance_request' maintenance_request.id %}" onsubmit="return confirm('Remove this maintenance request?');">
+                        {% csrf_token %}
+                        <button type="submit" class="maintenance-delete-btn">Remove Request</button>
+                    </form>
+                </article>
+            {% empty %}
+                <p class="maintenance-empty">You have not submitted any maintenance requests yet.</p>
+            {% endfor %}
+        </section>
+
     </main>
 
 </div>
 
+<script src="{% static 'properties/js/flash_messages.js' %}" defer></script>
 
 </body>
 
