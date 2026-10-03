@@ -1,7 +1,36 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables
 .env
+.env.*
+
+# Django
 db.sqlite3
+*.log
+
+# Static files
+staticfiles/
+
+# Media
 media/
+
+# IDE
 .vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python tools
+.pytest_cache/
+.coverage
+htmlcov/
