@@ -43,11 +43,10 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv(
         "ALLOWED_HOSTS",
-        "127.0.0.1,localhost"
+        "homenest-q4ji.onrender.com"
     ).split(",")
     if host.strip()
 ]
-
 
 # ============================================================
 # APPLICATIONS
@@ -314,8 +313,7 @@ if not DEBUG:
 # ============================================================
 # CSRF TRUSTED ORIGINS
 # ============================================================
-
-CSRF_TRUSTED_ORIGINS = [
+SRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
