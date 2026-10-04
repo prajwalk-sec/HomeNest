@@ -516,6 +516,29 @@ DEBUG=True
 
 The `.env` file should be included in `.gitignore`.
 
+### Render deployment
+
+For the existing Render Web Service, configure:
+
+- **Build Command:** `bash build.sh`
+- **Start Command:** `gunicorn config.wsgi:application`
+- **Environment variable:** `PYTHON_VERSION=3.11.9`
+
+Set these environment variables in the Render service dashboard (never commit
+the production secret):
+
+- `SECRET_KEY`: generate a secret value in Render.
+- `PYTHON_VERSION`: `3.11.9` (Render otherwise selects its current default).
+- `DEBUG`: `False`
+- `DATABASE_URL`: the internal connection URL for the separate Render
+  PostgreSQL service.
+- `ALLOWED_HOSTS`: optionally provide comma-separated hostnames; Render's
+  `RENDER_EXTERNAL_HOSTNAME` is added automatically.
+
+Locally, settings continue to load values from the ignored `.env` file. The
+existing `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` settings
+remain available when `DATABASE_URL` is not set.
+
 ---
 
 ## 🚫 Files Excluded From Git
