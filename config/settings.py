@@ -31,29 +31,27 @@ load_dotenv(BASE_DIR / ".env")
 # SECURITY
 # ============================================================
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is required.")
-
-
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-
-
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "ALLOWED_HOSTS",
-        "home-nest-mejd.vercel.app,.vercel.app"
-    ).split(",")
-    if host.strip()
+    "localhost",
+    "127.0.0.1",
+    "testserver",
+    "home-nest-mejd.vercel.app",
+    ".vercel.app",
 ]
+
+env_hosts = os.getenv("ALLOWED_HOSTS", "")
+
+if env_hosts:
+    ALLOWED_HOSTS.extend(
+        host.strip()
+        for host in env_hosts.split(",")
+        if host.strip()
+    )
 
 RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
 # ============================================================
 # APPLICATIONS
 # ============================================================
