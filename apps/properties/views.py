@@ -2,6 +2,11 @@
 # DJANGO IMPORTS
 # ============================================================
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -33,31 +38,23 @@ from .models import MaintenanceRequest, MaintenanceRequestHistory, Property
 # HOME PAGE
 # ============================================================
 
+
 def home(request):
-    """
-    Public landing page.
+    try:
+        properties = Property.objects.filter(
+            status="AVAILABLE"
+        ).order_by("-created_at")[:6]
 
-    This page does not require authentication.
-    It displays the latest available properties.
-    """
+        return render(
+            request,
+            "properties/home.html",
+            {"properties": properties},
+        )
 
-    # Get only properties that are currently available.
-    #
-    # order_by("-created_at") means newest properties
-    # appear first.
-    #
-    # [:6] limits the result to the first 6 properties.
-    properties = Property.objects.filter(
-        status="AVAILABLE"
-    ).order_by("-created_at")[:6]
+    except Exception:
+        logger.exception("HomeNest homepage failed")
+        raise
 
-    return render(
-        request,
-        "properties/home.html",
-        {
-            "properties": properties,
-        },
-    )
 
 
 # ============================================================
