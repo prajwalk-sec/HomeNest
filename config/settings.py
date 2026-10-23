@@ -39,6 +39,14 @@ if not SECRET_KEY or not SECRET_KEY.strip():
         "SECRET_KEY is missing or empty. Set it in the deployment "
         "environment (Render: Dashboard > Environment) or in your local .env."
     )
+
+CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+
+if not DEBUG and not CLOUDINARY_URL:
+    raise ImproperlyConfigured(
+        "CLOUDINARY_URL is required when DEBUG=False. Set it in the "
+        "deployment environment to enable persistent media storage."
+    )
 # ============================================================
 # SECURITY
 # ============================================================
@@ -77,6 +85,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "cloudinary_storage",
+    "cloudinary",
 
     # HomeNest apps
     "apps.accounts",
@@ -228,7 +238,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # WhiteNoise compressed static files
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if CLOUDINARY_URL
+            else "django.core.files.storage.FileSystemStorage"
+        ),
     },
     "staticfiles": {
         "BACKEND": (

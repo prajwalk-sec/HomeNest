@@ -510,11 +510,20 @@ Sensitive configuration should be stored in environment variables instead of bei
 Example:
 
 ```text
-SECRET_KEY=your-secret-key
-DEBUG=True
+SECRET_KEY=
+DEBUG=False
+CLOUDINARY_URL=
 ```
 
-The `.env` file should be included in `.gitignore`.
+Generate a key locally with:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+Copy `.env.example` to `.env`, then fill in `SECRET_KEY` with the generated
+value. The real `.env` file is ignored by Git; never commit it.
+The example file is only a template and must not be used as a real secret.
 
 ### Render deployment
 
@@ -524,16 +533,39 @@ For the existing Render Web Service, configure:
 - **Start Command:** `gunicorn config.wsgi:application`
 - **Environment variable:** `PYTHON_VERSION=3.11.9`
 
-Set these environment variables in the Render service dashboard (never commit
-the production secret):
+Generate a strong key locally with:
 
-- `SECRET_KEY`: generate a secret value in Render.
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+In the Render service, open **Dashboard > your web service > Environment**,
+add `SECRET_KEY`, and paste the generated value. A local `.env` file is not
+uploaded to Render. Also set:
+
+- `SECRET_KEY`: the generated value from the command above.
+- `CLOUDINARY_URL`: the Cloudinary connection URL from your Cloudinary
+  account. Add it as a secret environment variable; do not put its credentials
+  in source code. It is required when `DEBUG=False` so production uploads use
+  durable Cloudinary media storage instead of Render's ephemeral filesystem.
 - `PYTHON_VERSION`: `3.11.9` (Render otherwise selects its current default).
 - `DEBUG`: `False`
 - `DATABASE_URL`: the internal connection URL for the separate Render
   PostgreSQL service.
 - `ALLOWED_HOSTS`: optionally provide comma-separated hostnames; Render's
   `RENDER_EXTERNAL_HOSTNAME` is added automatically.
+
+Save the changes and redeploy the service. Do not commit the generated key or
+use a placeholder key in production. If `SECRET_KEY` is absent or blank, Django
+now stops during startup with an explicit configuration error instead of
+returning a 500 for each request. If `CLOUDINARY_URL` is absent with
+`DEBUG=False`, startup also fails clearly rather than silently storing uploads
+on Render's ephemeral filesystem.
+
+Property images uploaded before Cloudinary is configured are not copied
+automatically. Re-upload those images (or migrate existing files into
+Cloudinary) after configuring storage; files previously lost from Render's
+ephemeral filesystem cannot be recovered from this application.
 
 Locally, settings continue to load values from the ignored `.env` file. The
 existing `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` settings
