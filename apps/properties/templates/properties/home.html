@@ -163,9 +163,7 @@
           {% if property.image %}
             <img src="{{ property.image.url }}" alt="{{ property.title }}" loading="lazy" />
           {% else %}
-            <div class="card-image-placeholder">
-              <i class="fa-solid fa-house-chimney"></i>
-            </div>
+            <img src="{% static 'properties/images/property-placeholder.svg' %}" alt="No image available for {{ property.title }}" class="card-image-placeholder" loading="lazy" />
           {% endif %}
           <span class="card-badge">{{ property.get_property_type_display }}</span>
         </div>

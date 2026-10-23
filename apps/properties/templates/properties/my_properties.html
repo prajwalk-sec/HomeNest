@@ -45,7 +45,7 @@
                                 {% if property.image %}
                                     <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image">
                                 {% else %}
-                                    <div class="no-image">No image available</div>
+                                    <img src="{% static 'properties/images/property-placeholder.svg' %}" alt="No image available for {{ property.title }}" class="property-image">
                                 {% endif %}
 
                                 <div class="property-content">

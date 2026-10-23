@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title">
+  <title id="title">Property image unavailable</title>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#edf3ff"/>
+      <stop offset="1" stop-color="#e8edf7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#background)"/>
+  <path d="M360 355 600 165l240 190v185H360z" fill="#fff" stroke="#9aabc4" stroke-width="18" stroke-linejoin="round"/>
+  <path d="m315 365 285-225 285 225" fill="none" stroke="#56708f" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="535" y="405" width="130" height="135" rx="8" fill="#d8e2f0"/>
+  <rect x="405" y="390" width="85" height="75" rx="8" fill="#d8e2f0"/>
+  <rect x="710" y="390" width="85" height="75" rx="8" fill="#d8e2f0"/>
+</svg>
