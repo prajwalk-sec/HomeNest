@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 
@@ -31,6 +32,13 @@ load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY or not SECRET_KEY.strip():
+    raise ImproperlyConfigured(
+        "SECRET_KEY is missing or empty. Set it in the deployment "
+        "environment (Render: Dashboard > Environment) or in your local .env."
+    )
 # ============================================================
 # SECURITY
 # ============================================================
@@ -39,6 +47,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "testserver",
+    "homenest-q4ji.onrender.com",
     "home-nest-mejd.vercel.app",
     ".vercel.app",
 ]
@@ -340,6 +349,9 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+render_origin = "https://homenest-q4ji.onrender.com"
+if render_origin not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(render_origin)
 if RENDER_EXTERNAL_HOSTNAME:
     render_origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
     if render_origin not in CSRF_TRUSTED_ORIGINS:
