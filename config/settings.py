@@ -69,17 +69,6 @@ if (
         "CLOUDINARY_CONFIG_SOURCE must be either 'url' or 'individual'."
     )
 
-if (
-    CLOUDINARY_URL
-    and configured_cloudinary_credentials
-    and not CLOUDINARY_CONFIG_SOURCE
-):
-    raise ImproperlyConfigured(
-        "Both Cloudinary credential methods are configured. Set "
-        "CLOUDINARY_CONFIG_SOURCE=url or CLOUDINARY_CONFIG_SOURCE=individual "
-        "to select one explicitly."
-    )
-
 if CLOUDINARY_CONFIG_SOURCE == "url":
     if not CLOUDINARY_URL:
         raise ImproperlyConfigured(
@@ -113,6 +102,12 @@ elif CLOUDINARY_CONFIG_SOURCE == "individual":
         )
 elif CLOUDINARY_URL:
     selected_cloudinary_source = "url"
+    if configured_cloudinary_credentials:
+        logging.getLogger(__name__).warning(
+            "Both Cloudinary credential methods are configured; defaulting "
+            "to CLOUDINARY_URL and ignoring separate credential variables: %s",
+            ", ".join(configured_cloudinary_credentials),
+        )
 elif configured_cloudinary_credentials:
     missing_cloudinary_credentials = [
         name
