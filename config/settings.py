@@ -11,6 +11,7 @@ Production-ready configuration for:
 - HTTPS deployment
 """
 
+import logging
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -55,15 +56,85 @@ cloudinary_credentials = {
 configured_cloudinary_credentials = [
     name for name, value in cloudinary_credentials.items() if value
 ]
+CLOUDINARY_CONFIG_SOURCE = os.getenv(
+    "CLOUDINARY_CONFIG_SOURCE", ""
+).strip().lower()
+cloudinary_sources = {"url", "individual"}
 
-if CLOUDINARY_URL and configured_cloudinary_credentials:
+if (
+    CLOUDINARY_CONFIG_SOURCE
+    and CLOUDINARY_CONFIG_SOURCE not in cloudinary_sources
+):
     raise ImproperlyConfigured(
-        "Configure Cloudinary using either CLOUDINARY_URL or all of "
-        "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and "
-        "CLOUDINARY_API_SECRET. Do not mix both configuration methods."
+        "CLOUDINARY_CONFIG_SOURCE must be either 'url' or 'individual'."
     )
 
-if CLOUDINARY_URL:
+if (
+    CLOUDINARY_URL
+    and configured_cloudinary_credentials
+    and not CLOUDINARY_CONFIG_SOURCE
+):
+    raise ImproperlyConfigured(
+        "Both Cloudinary credential methods are configured. Set "
+        "CLOUDINARY_CONFIG_SOURCE=url or CLOUDINARY_CONFIG_SOURCE=individual "
+        "to select one explicitly."
+    )
+
+if CLOUDINARY_CONFIG_SOURCE == "url":
+    if not CLOUDINARY_URL:
+        raise ImproperlyConfigured(
+            "CLOUDINARY_CONFIG_SOURCE=url requires CLOUDINARY_URL."
+        )
+    selected_cloudinary_source = "url"
+    if configured_cloudinary_credentials:
+        logging.getLogger(__name__).warning(
+            "Both Cloudinary credential methods are configured; using "
+            "CLOUDINARY_URL and ignoring separate credential variables: %s",
+            ", ".join(configured_cloudinary_credentials),
+        )
+elif CLOUDINARY_CONFIG_SOURCE == "individual":
+    if len(configured_cloudinary_credentials) != len(
+        CLOUDINARY_CREDENTIAL_VARIABLES
+    ):
+        missing_cloudinary_credentials = [
+            name
+            for name, value in cloudinary_credentials.items()
+            if not value
+        ]
+        raise ImproperlyConfigured(
+            "CLOUDINARY_CONFIG_SOURCE=individual requires all of: "
+            + ", ".join(missing_cloudinary_credentials)
+        )
+    selected_cloudinary_source = "individual"
+    if CLOUDINARY_URL:
+        logging.getLogger(__name__).warning(
+            "Both Cloudinary credential methods are configured; using "
+            "the individual credential variables and ignoring CLOUDINARY_URL."
+        )
+elif CLOUDINARY_URL:
+    selected_cloudinary_source = "url"
+elif configured_cloudinary_credentials:
+    missing_cloudinary_credentials = [
+        name
+        for name, value in cloudinary_credentials.items()
+        if not value
+    ]
+    if missing_cloudinary_credentials:
+        raise ImproperlyConfigured(
+            "Missing Cloudinary environment variable(s): "
+            + ", ".join(missing_cloudinary_credentials)
+        )
+    selected_cloudinary_source = "individual"
+elif not DEBUG:
+    raise ImproperlyConfigured(
+        "Cloudinary credentials are required when DEBUG=False. Set "
+        "CLOUDINARY_URL or all of CLOUDINARY_CLOUD_NAME, "
+        "CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET."
+    )
+else:
+    selected_cloudinary_source = None
+
+if selected_cloudinary_source == "url":
     try:
         parsed_cloudinary_url = urlsplit(CLOUDINARY_URL)
         cloudinary_url_is_complete = (
@@ -80,29 +151,24 @@ if CLOUDINARY_URL:
             "CLOUDINARY_URL is incomplete or invalid. It must include "
             "the Cloudinary API key, API secret, and cloud name."
         )
-elif configured_cloudinary_credentials:
-    missing_cloudinary_credentials = [
-        name
-        for name, value in cloudinary_credentials.items()
-        if not value
-    ]
-    if missing_cloudinary_credentials:
-        raise ImproperlyConfigured(
-            "Missing Cloudinary environment variable(s): "
-            + ", ".join(missing_cloudinary_credentials)
-        )
-elif not DEBUG:
-    raise ImproperlyConfigured(
-        "Cloudinary credentials are required when DEBUG=False. Set "
-        "CLOUDINARY_URL or all of CLOUDINARY_CLOUD_NAME, "
-        "CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET."
-    )
 
-if CLOUDINARY_URL or len(configured_cloudinary_credentials) == len(
-    CLOUDINARY_CREDENTIAL_VARIABLES
-):
+    selected_cloudinary_credentials = {
+        "cloud_name": parsed_cloudinary_url.hostname,
+        "api_key": parsed_cloudinary_url.username,
+        "api_secret": parsed_cloudinary_url.password,
+    }
+elif selected_cloudinary_source == "individual":
+    selected_cloudinary_credentials = {
+        "cloud_name": cloudinary_credentials["CLOUDINARY_CLOUD_NAME"],
+        "api_key": cloudinary_credentials["CLOUDINARY_API_KEY"],
+        "api_secret": cloudinary_credentials["CLOUDINARY_API_SECRET"],
+    }
+else:
+    selected_cloudinary_credentials = None
+
+if selected_cloudinary_credentials:
     cloudinary.reset_config()
-    cloudinary_config = cloudinary.config()
+    cloudinary_config = cloudinary.config(**selected_cloudinary_credentials)
     missing_sdk_credentials = [
         name
         for name, value in (
@@ -113,22 +179,14 @@ if CLOUDINARY_URL or len(configured_cloudinary_credentials) == len(
         if not value
     ]
     if missing_sdk_credentials:
-        credential_source = (
-            "CLOUDINARY_URL"
-            if CLOUDINARY_URL
-            else ", ".join(CLOUDINARY_CREDENTIAL_VARIABLES)
-        )
         raise ImproperlyConfigured(
             "Cloudinary configuration from "
-            f"{credential_source} is missing: "
+            f"{CLOUDINARY_CONFIG_SOURCE or selected_cloudinary_source} "
+            "is missing: "
             + ", ".join(missing_sdk_credentials)
         )
 
-CLOUDINARY_CONFIGURED = bool(
-    CLOUDINARY_URL
-    or len(configured_cloudinary_credentials)
-    == len(CLOUDINARY_CREDENTIAL_VARIABLES)
-)
+CLOUDINARY_CONFIGURED = selected_cloudinary_source is not None
 # ============================================================
 # SECURITY
 # ============================================================
