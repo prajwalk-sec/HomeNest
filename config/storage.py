@@ -1,8 +1,13 @@
+import logging
 import posixpath
+import traceback
 
 import cloudinary
+from cloudinary.exceptions import Error as CloudinaryError
 from cloudinary_storage.storage import MediaCloudinaryStorage
 from django.core.files.uploadedfile import UploadedFile
+
+logger = logging.getLogger(__name__)
 
 
 class HomeNestMediaCloudinaryStorage(MediaCloudinaryStorage):
@@ -54,9 +59,30 @@ class HomeNestMediaCloudinaryStorage(MediaCloudinaryStorage):
 
         upload_name = name[len(self.property_prefix):]
         content = UploadedFile(content, upload_name)
-        response = self._upload(upload_name, content)
-        version = int(response["version"])
-        return f"{self.property_prefix}v{version}/{response['public_id']}"
+        try:
+            response = self._upload(upload_name, content)
+            public_id = response["public_id"]
+            version = int(response["version"])
+            if not public_id:
+                raise CloudinaryError(
+                    "Cloudinary upload response did not include a public ID."
+                )
+        except Exception as exc:
+            credentials = cloudinary.config()
+            logger.error(
+                "Cloudinary property upload failed "
+                "(exception_type=%s, cloud_name_configured=%s, "
+                "api_key_configured=%s, api_secret_configured=%s); "
+                "traceback follows:\n%s",
+                type(exc).__name__,
+                bool(credentials.cloud_name),
+                bool(credentials.api_key),
+                bool(credentials.api_secret),
+                "".join(traceback.format_tb(exc.__traceback__)),
+            )
+            raise
+
+        return f"{self.property_prefix}v{version}/{public_id}"
 
     def _get_url(self, name):
         public_id = self._property_public_id(name)

@@ -13,7 +13,9 @@ Production-ready configuration for:
 
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
+import cloudinary
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -40,13 +42,93 @@ if not SECRET_KEY or not SECRET_KEY.strip():
         "environment (Render: Dashboard > Environment) or in your local .env."
     )
 
-CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+CLOUDINARY_URL = os.getenv("CLOUDINARY_URL", "").strip()
+CLOUDINARY_CREDENTIAL_VARIABLES = (
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+)
+cloudinary_credentials = {
+    name: os.getenv(name, "").strip()
+    for name in CLOUDINARY_CREDENTIAL_VARIABLES
+}
+configured_cloudinary_credentials = [
+    name for name, value in cloudinary_credentials.items() if value
+]
 
-if not DEBUG and not CLOUDINARY_URL:
+if CLOUDINARY_URL and configured_cloudinary_credentials:
     raise ImproperlyConfigured(
-        "CLOUDINARY_URL is required when DEBUG=False. Set it in the "
-        "deployment environment to enable persistent media storage."
+        "Configure Cloudinary using either CLOUDINARY_URL or all of "
+        "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and "
+        "CLOUDINARY_API_SECRET. Do not mix both configuration methods."
     )
+
+if CLOUDINARY_URL:
+    try:
+        parsed_cloudinary_url = urlsplit(CLOUDINARY_URL)
+        cloudinary_url_is_complete = (
+            parsed_cloudinary_url.scheme.lower() == "cloudinary"
+            and parsed_cloudinary_url.username
+            and parsed_cloudinary_url.password
+            and parsed_cloudinary_url.hostname
+        )
+    except ValueError:
+        cloudinary_url_is_complete = False
+
+    if not cloudinary_url_is_complete:
+        raise ImproperlyConfigured(
+            "CLOUDINARY_URL is incomplete or invalid. It must include "
+            "the Cloudinary API key, API secret, and cloud name."
+        )
+elif configured_cloudinary_credentials:
+    missing_cloudinary_credentials = [
+        name
+        for name, value in cloudinary_credentials.items()
+        if not value
+    ]
+    if missing_cloudinary_credentials:
+        raise ImproperlyConfigured(
+            "Missing Cloudinary environment variable(s): "
+            + ", ".join(missing_cloudinary_credentials)
+        )
+elif not DEBUG:
+    raise ImproperlyConfigured(
+        "Cloudinary credentials are required when DEBUG=False. Set "
+        "CLOUDINARY_URL or all of CLOUDINARY_CLOUD_NAME, "
+        "CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET."
+    )
+
+if CLOUDINARY_URL or len(configured_cloudinary_credentials) == len(
+    CLOUDINARY_CREDENTIAL_VARIABLES
+):
+    cloudinary.reset_config()
+    cloudinary_config = cloudinary.config()
+    missing_sdk_credentials = [
+        name
+        for name, value in (
+            ("cloud name", cloudinary_config.cloud_name),
+            ("API key", cloudinary_config.api_key),
+            ("API secret", cloudinary_config.api_secret),
+        )
+        if not value
+    ]
+    if missing_sdk_credentials:
+        credential_source = (
+            "CLOUDINARY_URL"
+            if CLOUDINARY_URL
+            else ", ".join(CLOUDINARY_CREDENTIAL_VARIABLES)
+        )
+        raise ImproperlyConfigured(
+            "Cloudinary configuration from "
+            f"{credential_source} is missing: "
+            + ", ".join(missing_sdk_credentials)
+        )
+
+CLOUDINARY_CONFIGURED = bool(
+    CLOUDINARY_URL
+    or len(configured_cloudinary_credentials)
+    == len(CLOUDINARY_CREDENTIAL_VARIABLES)
+)
 # ============================================================
 # SECURITY
 # ============================================================
@@ -240,7 +322,7 @@ STORAGES = {
     "default": {
         "BACKEND": (
             "config.storage.HomeNestMediaCloudinaryStorage"
-            if CLOUDINARY_URL
+            if CLOUDINARY_CONFIGURED
             else "django.core.files.storage.FileSystemStorage"
         ),
     },

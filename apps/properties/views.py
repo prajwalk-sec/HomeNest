@@ -165,10 +165,12 @@ def edit_property(request, property_id):
     if request.method == "POST" and form.is_valid():
         try:
             form.save()
-        except CloudinaryError:
-            logger.exception(
-                "Cloudinary upload failed while updating property %s",
+        except CloudinaryError as exc:
+            logger.warning(
+                "Cloudinary property update failed for property %s "
+                "(exception_type=%s); see storage traceback",
                 property_obj.pk,
+                type(exc).__name__,
             )
             messages.error(
                 request,

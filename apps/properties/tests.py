@@ -59,6 +59,7 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
         )
 
     def test_new_property_upload_uses_root_public_id(self):
+        image_content = b"uploaded image bytes"
         with patch.object(
             self.storage,
             "_upload",
@@ -69,7 +70,7 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
         ) as upload:
             saved_name = self.storage.save(
                 "properties/new-property-image.jpg",
-                ContentFile(b"image data"),
+                ContentFile(image_content),
             )
 
         self.assertEqual(saved_name, "properties/v1792745196/new-property-image")
@@ -78,11 +79,40 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
             upload.call_args.args[1].name,
             "new-property-image.jpg",
         )
+        self.assertEqual(
+            upload.call_args.args[1].read(),
+            image_content,
+        )
+        self.assertTrue(
+            self.storage.url(saved_name).startswith(
+                "https://res.cloudinary.com/"
+            )
+        )
         self.assertTrue(
             self.storage.url(saved_name).endswith(
                 "/image/upload/v1792745196/new-property-image"
             )
         )
+
+    def test_upload_failure_logs_safe_exception_type_and_traceback(self):
+        file_contents = b"private image contents"
+        with patch.object(
+            self.storage,
+            "_upload",
+            side_effect=CloudinaryError("private diagnostic value"),
+        ):
+            with self.assertLogs("config.storage", level="ERROR") as logs:
+                with self.assertRaises(CloudinaryError):
+                    self.storage.save(
+                        "properties/private-name.jpg",
+                        ContentFile(file_contents),
+                    )
+
+        output = "\n".join(logs.output)
+        self.assertIn("exception_type=Error", output)
+        self.assertIn("_save", output)
+        self.assertNotIn("private diagnostic value", output)
+        self.assertNotIn(file_contents.decode(), output)
 
     def test_other_media_paths_keep_the_configured_media_prefix(self):
         image_url = self.storage.url("maintenance/repair.jpg")

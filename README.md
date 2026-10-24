@@ -515,6 +515,12 @@ DEBUG=False
 CLOUDINARY_URL=
 ```
 
+Cloudinary credentials may instead be provided as the complete set
+`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+Use exactly one configuration method; do not combine these variables with
+`CLOUDINARY_URL`. Django validates that the selected method supplies all
+required credentials at startup without displaying their values.
+
 Generate a key locally with:
 
 ```bash
@@ -545,9 +551,12 @@ uploaded to Render. Also set:
 
 - `SECRET_KEY`: the generated value from the command above.
 - `CLOUDINARY_URL`: the Cloudinary connection URL from your Cloudinary
-  account. Add it as a secret environment variable; do not put its credentials
-  in source code. It is required when `DEBUG=False` so production uploads use
-  durable Cloudinary media storage instead of Render's ephemeral filesystem.
+  account, or configure all three variables `CLOUDINARY_CLOUD_NAME`,
+  `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` instead. Use exactly one
+  method and add credential values as secret environment variables; do not put
+  them in source code. Cloudinary credentials are required when `DEBUG=False`
+  so production uploads use durable Cloudinary media storage instead of
+  Render's ephemeral filesystem.
 - `PYTHON_VERSION`: `3.11.9` (Render otherwise selects its current default).
 - `DEBUG`: `False`
 - `DATABASE_URL`: the internal connection URL for the separate Render
