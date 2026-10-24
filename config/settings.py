@@ -233,17 +233,22 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 if DATABASE_URL:
     try:
+        database_url_scheme = urlsplit(DATABASE_URL).scheme.lower()
+        if database_url_scheme not in {"postgres", "postgresql"}:
+            raise ValueError
+
         DATABASES = {
             "default": dj_database_url.parse(
                 DATABASE_URL,
+                engine="django.db.backends.postgresql",
                 conn_max_age=600,
             ),
         }
-    except (TypeError, ValueError) as exc:
+    except (TypeError, ValueError):
         raise ImproperlyConfigured(
             "DATABASE_URL is invalid. Set it to the internal URL for the "
             "existing Render PostgreSQL database."
-        ) from exc
+        ) from None
 
     if not DATABASES["default"].get("ENGINE"):
         raise ImproperlyConfigured(
