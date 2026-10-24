@@ -239,7 +239,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {
         "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            "config.storage.HomeNestMediaCloudinaryStorage"
             if CLOUDINARY_URL
             else "django.core.files.storage.FileSystemStorage"
         ),

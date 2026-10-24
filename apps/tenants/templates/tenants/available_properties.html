@@ -58,7 +58,7 @@
                     {% for property in properties %}
                         <div class="property-card">
                             {% if property.image %}
-                                <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image">
+                                <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image" data-placeholder-src="{% static 'properties/images/property-placeholder.svg' %}" onerror="console.error('Property image failed to load:', this.src); this.onerror=null; this.src=this.dataset.placeholderSrc;">
                             {% else %}
                                 <img src="{% static 'properties/images/property-placeholder.svg' %}" alt="No image available for {{ property.title }}" class="property-image">
                             {% endif %}

@@ -49,7 +49,7 @@
                             {% if property.image %}
                                 <div class="form-group current-image">
                                     <label>Current Property Image</label>
-                                    <img src="{{ property.image.url }}" alt="{{ property.title }}">
+                                    <img src="{{ property.image.url }}" alt="{{ property.title }}" data-placeholder-src="{% static 'properties/images/property-placeholder.svg' %}" onerror="console.error('Property image failed to load:', this.src); this.onerror=null; this.src=this.dataset.placeholderSrc;">
                                 </div>
                             {% endif %}
 

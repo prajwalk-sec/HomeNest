@@ -161,7 +161,7 @@
       <article class="property-card reveal" style="--card-index: {{ forloop.counter0 }};">
         <div class="card-image">
           {% if property.image %}
-            <img src="{{ property.image.url }}" alt="{{ property.title }}" loading="lazy" />
+            <img src="{{ property.image.url }}" alt="{{ property.title }}" loading="lazy" data-placeholder-src="{% static 'properties/images/property-placeholder.svg' %}" onerror="console.error('Property image failed to load:', this.src); this.onerror=null; this.src=this.dataset.placeholderSrc;" />
           {% else %}
             <img src="{% static 'properties/images/property-placeholder.svg' %}" alt="No image available for {{ property.title }}" class="card-image-placeholder" loading="lazy" />
           {% endif %}

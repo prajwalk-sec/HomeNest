@@ -1,13 +1,79 @@
 from io import BytesIO
+from unittest import skipUnless
+from unittest.mock import patch
 
+from django.conf import settings
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from PIL import Image
 
 from apps.accounts.models import User
 from apps.properties.models import MaintenanceRequest, MaintenanceRequestHistory, Property
 from apps.tenants.models import Rental
+
+
+@skipUnless(settings.CLOUDINARY_URL, "Cloudinary is not configured.")
+class PropertyCloudinaryStorageTests(SimpleTestCase):
+
+    def setUp(self):
+        from config.storage import HomeNestMediaCloudinaryStorage
+
+        self.storage = HomeNestMediaCloudinaryStorage()
+
+    def test_legacy_property_path_uses_root_cloudinary_public_id(self):
+        image_url = self.storage.url(
+            "properties/047c6f68fa70f1901dd609a1d9ece210.jpg"
+        )
+
+        self.assertTrue(
+            image_url.endswith(
+                "/image/upload/047c6f68fa70f1901dd609a1d9ece210"
+            )
+        )
+        self.assertNotIn("/media/", image_url)
+        self.assertNotIn("/properties/", image_url)
+        self.assertNotIn("/v1/", image_url)
+
+    def test_property_image_field_uses_root_cloudinary_urls(self):
+        image_url = Property._meta.get_field("image").storage.url(
+            "properties/047c6f68fa70f1901dd609a1d9ece210.jpg"
+        )
+
+        self.assertTrue(
+            image_url.endswith(
+                "/image/upload/047c6f68fa70f1901dd609a1d9ece210"
+            )
+        )
+
+    def test_new_property_upload_uses_root_public_id(self):
+        with patch.object(
+            self.storage,
+            "_upload",
+            return_value={"public_id": "new-property-image"},
+        ) as upload:
+            saved_name = self.storage.save(
+                "properties/new-property-image.jpg",
+                ContentFile(b"image data"),
+            )
+
+        self.assertEqual(saved_name, "properties/new-property-image")
+        self.assertEqual(upload.call_args.args[0], "new-property-image.jpg")
+        self.assertEqual(
+            upload.call_args.args[1].name,
+            "new-property-image.jpg",
+        )
+        self.assertTrue(
+            self.storage.url(saved_name).endswith(
+                "/image/upload/new-property-image"
+            )
+        )
+
+    def test_other_media_paths_keep_the_configured_media_prefix(self):
+        image_url = self.storage.url("maintenance/repair.jpg")
+
+        self.assertIn("/media/maintenance/repair.jpg", image_url)
 
 
 class MaintenanceRequestPhotoUploadTests(TestCase):

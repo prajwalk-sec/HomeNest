@@ -566,6 +566,16 @@ Property images uploaded before Cloudinary is configured are not copied
 automatically. Re-upload those images (or migrate existing files into
 Cloudinary) after configuring storage; files previously lost from Render's
 ephemeral filesystem cannot be recovered from this application.
+Existing property records keep their `properties/<filename>` database paths.
+The property-aware Cloudinary storage resolves those legacy paths against
+root-level Cloudinary public IDs, and saves new property images at the same
+Cloudinary root level. Image filename extensions are not included in the
+public ID. The model stores the public ID but not Cloudinary's upload version;
+versionless delivery URLs let Cloudinary resolve the current asset. Other media
+types keep their existing storage paths.
+For local property files that are not yet in Cloudinary, upload each file to
+the Cloudinary root using its existing filename/public ID before redeploying.
+The application does not automatically copy local media files to Cloudinary.
 
 Locally, settings continue to load values from the ignored `.env` file. The
 existing `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` settings
