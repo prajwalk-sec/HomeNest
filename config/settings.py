@@ -250,16 +250,6 @@ if DATABASE_URL:
             "existing Render PostgreSQL database."
         ) from None
 
-    if not DATABASES["default"].get("ENGINE"):
-        raise ImproperlyConfigured(
-            "DATABASE_URL did not resolve to a database engine. Set it to "
-            "the internal URL for the existing Render PostgreSQL database."
-        )
-
-    if not DATABASES["default"]["ENGINE"].endswith("postgresql"):
-        raise ImproperlyConfigured(
-            "DATABASE_URL must point to the existing PostgreSQL database."
-        )
 elif not DEBUG:
     raise ImproperlyConfigured(
         "DATABASE_URL is required in production. Set it to the internal URL "
@@ -277,6 +267,26 @@ else:
             "CONN_MAX_AGE": 600,
         }
     }
+
+default_database = (
+    DATABASES.get("default") if isinstance(DATABASES, dict) else None
+)
+if not isinstance(default_database, dict):
+    raise ImproperlyConfigured(
+        "DATABASES must contain a default database configuration."
+    )
+
+database_engine = default_database.get("ENGINE")
+if not database_engine:
+    raise ImproperlyConfigured(
+        "DATABASE_URL did not resolve to a database engine. Set it to "
+        "the internal URL for the existing Render PostgreSQL database."
+    )
+
+if not database_engine.endswith("postgresql"):
+    raise ImproperlyConfigured(
+        "DATABASE_URL must point to the existing PostgreSQL database."
+    )
 
 
 # ============================================================
