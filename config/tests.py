@@ -54,6 +54,59 @@ class DatabaseSettingsTests(SimpleTestCase):
                 )
                 self.assertNotIn("test-password", result.stdout + result.stderr)
 
+    def test_postgres_database_url_sets_production_ssl(self):
+        env = os.environ.copy()
+        for name in (
+            "CLOUDINARY_CLOUD_NAME",
+            "CLOUDINARY_API_KEY",
+            "CLOUDINARY_API_SECRET",
+        ):
+            env.pop(name, None)
+        env.update(
+            {
+                "DJANGO_SETTINGS_MODULE": "config.settings",
+                "SECRET_KEY": "settings-test-key",
+                "DEBUG": "False",
+                "CLOUDINARY_URL": (
+                    "cloudinary://"
+                    + "test-key"
+                    + ":"
+                    + "test-secret"
+                    + "@example-cloud"
+                ),
+                "DATABASE_URL": (
+                    "postgresql://"
+                    + "db-user"
+                    + ":"
+                    + "test-password"
+                    + "@db-host:5432/home_nest"
+                ),
+            }
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "from django.conf import settings; "
+                    "database = settings.DATABASES['default']; "
+                    "print(database['ENGINE']); "
+                    "print(database.get('OPTIONS', {}).get('sslmode'))"
+                ),
+            ],
+            capture_output=True,
+            check=False,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            result.stdout.splitlines(),
+            ["django.db.backends.postgresql", "require"],
+        )
+        self.assertNotIn("test-password", result.stdout + result.stderr)
+
     def test_missing_database_url_fails_with_clear_safe_error(self):
         result = self.run_settings_import("")
 

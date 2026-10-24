@@ -242,16 +242,16 @@ if DATABASE_URL:
         ):
             raise ValueError
 
-        database_config = dj_database_url.parse(
-            DATABASE_URL,
-            engine="django.db.backends.postgresql",
-            conn_max_age=600,
-            ssl_require=not DEBUG,
+        database_config = dict(
+            dj_database_url.parse(
+                DATABASE_URL,
+                engine="django.db.backends.postgresql",
+                conn_max_age=600,
+                ssl_require=not DEBUG,
+            )
         )
         database_config["ENGINE"] = "django.db.backends.postgresql"
-        DATABASES = {
-            "default": database_config,
-        }
+        DATABASES = {"default": database_config}
     except (TypeError, ValueError):
         raise ImproperlyConfigured(
             "DATABASE_URL is invalid. Set it to the internal URL for the "
