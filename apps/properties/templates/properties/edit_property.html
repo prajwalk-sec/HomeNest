@@ -46,6 +46,14 @@
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
 
+                            {% if messages %}
+                                <div role="alert">
+                                    {% for message in messages %}
+                                        <p>{{ message }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
                             {% if form.errors %}
                                 <div role="alert">{{ form.errors }}</div>
                             {% endif %}

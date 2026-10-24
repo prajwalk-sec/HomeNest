@@ -4,15 +4,15 @@
 
 import logging
 
-logger = logging.getLogger(__name__)
-
-
+from cloudinary.exceptions import Error as CloudinaryError
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -163,8 +163,25 @@ def edit_property(request, property_id):
         instance=property_obj,
     )
     if request.method == "POST" and form.is_valid():
-        form.save()
-        return redirect("my_properties")
+        try:
+            form.save()
+        except CloudinaryError:
+            logger.exception(
+                "Cloudinary upload failed while updating property %s",
+                property_obj.pk,
+            )
+            messages.error(
+                request,
+                "The image could not be uploaded. Your property was not changed. "
+                "Please try again later.",
+            )
+            property_obj = get_object_or_404(
+                Property,
+                id=property_id,
+                owner=request.user,
+            )
+        else:
+            return redirect("my_properties")
 
     # Display the existing property information
     # inside the edit form.

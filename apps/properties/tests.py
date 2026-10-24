@@ -5,9 +5,15 @@ from unittest.mock import patch
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import SimpleTestCase, TestCase
+from django.test import (
+    SimpleTestCase,
+    TestCase,
+    TransactionTestCase,
+    override_settings,
+)
 from django.urls import reverse
 from PIL import Image
+from cloudinary.exceptions import Error as CloudinaryError
 
 from apps.accounts.models import User
 from apps.properties.forms import PropertyForm
@@ -210,6 +216,79 @@ class MaintenanceRequestPhotoUploadTests(TestCase):
         history = request.history.get()
         self.assertEqual(history.status, "PENDING")
         self.assertEqual(history.updated_by, tenant)
+
+
+@skipUnless(settings.CLOUDINARY_URL, "Cloudinary is not configured.")
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": "config.storage.HomeNestMediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+)
+class PropertyEditCloudinaryFailureTests(TransactionTestCase):
+
+    def test_failed_image_upload_keeps_existing_property_unchanged(self):
+        owner = User.objects.create_user(
+            username="property-owner",
+            email="property-owner@example.com",
+            password="test-password",
+            role="OWNER",
+        )
+        property_obj = Property.objects.create(
+            owner=owner,
+            title="Original title",
+            description="Original description",
+            property_type="HOUSE",
+            address="1 Existing Road",
+            city="Mumbai",
+            rent=25000,
+            bedrooms=2,
+            bathrooms=1,
+            status="AVAILABLE",
+            image="properties/existing-image",
+        )
+        image_buffer = BytesIO()
+        Image.new("RGB", (10, 10), color="blue").save(
+            image_buffer,
+            format="JPEG",
+        )
+        upload = SimpleUploadedFile(
+            "replacement.jpg",
+            image_buffer.getvalue(),
+            content_type="image/jpeg",
+        )
+
+        self.client.force_login(owner)
+        with patch(
+            "config.storage.HomeNestMediaCloudinaryStorage._upload",
+            side_effect=CloudinaryError("Cloudinary unavailable"),
+        ):
+            response = self.client.post(
+                reverse("edit_property", args=[property_obj.pk]),
+                {
+                    "title": "Changed title",
+                    "description": "Changed description",
+                    "property_type": "HOUSE",
+                    "address": "2 New Road",
+                    "city": "Mumbai",
+                    "rent": "26000",
+                    "bedrooms": "3",
+                    "bathrooms": "2",
+                    "status": "AVAILABLE",
+                    "image": upload,
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        property_obj.refresh_from_db()
+        self.assertEqual(property_obj.title, "Original title")
+        self.assertEqual(property_obj.description, "Original description")
+        self.assertEqual(property_obj.image.name, "properties/existing-image")
+        self.assertContains(response, "The image could not be uploaded")
 
 
 class MaintenanceRequestWorkflowTests(TestCase):
