@@ -73,6 +73,18 @@ class DatabaseSettingsTests(SimpleTestCase):
         self.assertIn("DATABASE_URL is invalid", result.stderr)
         self.assertNotIn("test-password", result.stderr)
 
+    def test_postgres_database_url_without_host_or_database_fails_safely(self):
+        for database_url in (
+            "postgresql:///home_nest",
+            "postgresql://db-host",
+        ):
+            with self.subTest(database_url=database_url):
+                result = self.run_settings_import(database_url)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("DATABASE_URL is invalid", result.stderr)
+                self.assertNotIn("test-password", result.stderr)
+
     def test_management_command_uses_project_settings_when_env_is_overridden(self):
         env = os.environ.copy()
         for name in (
