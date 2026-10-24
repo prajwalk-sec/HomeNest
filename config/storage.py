@@ -25,11 +25,26 @@ class HomeNestMediaCloudinaryStorage(MediaCloudinaryStorage):
     def _property_public_id(self, name):
         name = self._normalise_name(name)
         if name.startswith(self.property_prefix):
-            public_id = name[len(self.property_prefix):]
+            asset_path = name[len(self.property_prefix):]
+            version, separator, public_id = asset_path.partition("/")
+            if separator and version.startswith("v") and version[1:].isdigit():
+                return public_id
+
+            public_id = asset_path
             public_id, extension = posixpath.splitext(public_id)
             if extension.lower() in self.image_extensions:
                 return public_id
             return public_id + extension
+        return None
+
+    def _property_version(self, name):
+        name = self._normalise_name(name)
+        if not name.startswith(self.property_prefix):
+            return None
+
+        version, separator, _ = name[len(self.property_prefix):].partition("/")
+        if separator and version.startswith("v") and version[1:].isdigit():
+            return int(version[1:])
         return None
 
     def _save(self, name, content):
@@ -40,7 +55,8 @@ class HomeNestMediaCloudinaryStorage(MediaCloudinaryStorage):
         upload_name = name[len(self.property_prefix):]
         content = UploadedFile(content, upload_name)
         response = self._upload(upload_name, content)
-        return f"{self.property_prefix}{response['public_id']}"
+        version = int(response["version"])
+        return f"{self.property_prefix}v{version}/{response['public_id']}"
 
     def _get_url(self, name):
         public_id = self._property_public_id(name)
@@ -50,6 +66,7 @@ class HomeNestMediaCloudinaryStorage(MediaCloudinaryStorage):
         resource_type = self._get_resource_type(name)
         return cloudinary.CloudinaryResource(
             public_id,
+            version=self._property_version(name),
             default_resource_type=resource_type,
         ).url
 

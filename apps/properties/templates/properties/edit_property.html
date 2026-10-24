@@ -46,6 +46,10 @@
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
 
+                            {% if form.errors %}
+                                <div role="alert">{{ form.errors }}</div>
+                            {% endif %}
+
                             {% if property.image %}
                                 <div class="form-group current-image">
                                     <label>Current Property Image</label>
@@ -61,55 +65,55 @@
 
                             <div class="form-group">
                                 <label>Property Title</label>
-                                <input type="text" name="title" value="{{ property.title }}" required>
+                                <input type="text" name="title" value="{{ form.title.value }}" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Description</label>
-                                <textarea name="description" required>{{ property.description }}</textarea>
+                                <textarea name="description" required>{{ form.description.value }}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <label>Property Type</label>
                                 <select name="property_type" required>
-                                    <option value="HOUSE" {% if property.property_type == "HOUSE" %}selected{% endif %}>House</option>
-                                    <option value="APARTMENT" {% if property.property_type == "APARTMENT" %}selected{% endif %}>Apartment</option>
-                                    <option value="VILLA" {% if property.property_type == "VILLA" %}selected{% endif %}>Villa</option>
-                                    <option value="ROOM" {% if property.property_type == "ROOM" %}selected{% endif %}>Room</option>
-                                    <option value="PG" {% if property.property_type == "PG" %}selected{% endif %}>PG</option>
+                                    <option value="HOUSE" {% if form.property_type.value == "HOUSE" %}selected{% endif %}>House</option>
+                                    <option value="APARTMENT" {% if form.property_type.value == "APARTMENT" %}selected{% endif %}>Apartment</option>
+                                    <option value="VILLA" {% if form.property_type.value == "VILLA" %}selected{% endif %}>Villa</option>
+                                    <option value="ROOM" {% if form.property_type.value == "ROOM" %}selected{% endif %}>Room</option>
+                                    <option value="PG" {% if form.property_type.value == "PG" %}selected{% endif %}>PG</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label>Address</label>
-                                <textarea name="address" required>{{ property.address }}</textarea>
+                                <textarea name="address" required>{{ form.address.value }}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <label>City</label>
-                                <input type="text" name="city" value="{{ property.city }}" required>
+                                <input type="text" name="city" value="{{ form.city.value }}" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Monthly Rent</label>
-                                <input type="number" name="rent" value="{{ property.rent }}" min="0" required>
+                                <input type="number" name="rent" value="{{ form.rent.value }}" min="0" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Bedrooms</label>
-                                <input type="number" name="bedrooms" value="{{ property.bedrooms }}" min="1" required>
+                                <input type="number" name="bedrooms" value="{{ form.bedrooms.value }}" min="1" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Bathrooms</label>
-                                <input type="number" name="bathrooms" value="{{ property.bathrooms }}" min="1" required>
+                                <input type="number" name="bathrooms" value="{{ form.bathrooms.value }}" min="1" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Status</label>
                                 <select name="status" required>
-                                    <option value="AVAILABLE" {% if property.status == "AVAILABLE" %}selected{% endif %}>Available</option>
-                                    <option value="RENTED" {% if property.status == "RENTED" %}selected{% endif %}>Rented</option>
+                                    <option value="AVAILABLE" {% if form.status.value == "AVAILABLE" %}selected{% endif %}>Available</option>
+                                    <option value="RENTED" {% if form.status.value == "RENTED" %}selected{% endif %}>Rented</option>
                                 </select>
                             </div>
 

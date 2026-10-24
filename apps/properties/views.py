@@ -28,7 +28,11 @@ from apps.tenants.models import Rental
 from apps.accounts.decorators import owner_required, tenant_required
 
 # Form used to create maintenance requests.
-from .forms import MaintenanceRequestForm, OwnerMaintenanceUpdateForm
+from .forms import (
+    MaintenanceRequestForm,
+    OwnerMaintenanceUpdateForm,
+    PropertyForm,
+)
 
 # Models used by this application.
 from .models import MaintenanceRequest, MaintenanceRequestHistory, Property
@@ -153,29 +157,13 @@ def edit_property(request, property_id):
         owner=request.user,
     )
 
-    # Process the submitted edit form.
-    if request.method == "POST":
-
-        # Update the property's basic information.
-        property_obj.title = request.POST.get("title")
-        property_obj.description = request.POST.get("description")
-        property_obj.property_type = request.POST.get("property_type")
-        property_obj.address = request.POST.get("address")
-        property_obj.city = request.POST.get("city")
-        property_obj.rent = request.POST.get("rent")
-        property_obj.bedrooms = request.POST.get("bedrooms")
-        property_obj.bathrooms = request.POST.get("bathrooms")
-        property_obj.status = request.POST.get("status")
-
-        # Only replace the existing image if the owner
-        # selected a new image.
-        if request.FILES.get("image"):
-            property_obj.image = request.FILES.get("image")
-
-        # Save all changes to the database.
-        property_obj.save()
-
-        # Return to the owner's property list.
+    form = PropertyForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=property_obj,
+    )
+    if request.method == "POST" and form.is_valid():
+        form.save()
         return redirect("my_properties")
 
     # Display the existing property information
@@ -185,6 +173,7 @@ def edit_property(request, property_id):
         "properties/edit_property.html",
         {
             "property": property_obj,
+            "form": form,
         },
     )
 

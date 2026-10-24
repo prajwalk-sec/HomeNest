@@ -10,7 +10,12 @@ from django.urls import reverse
 from PIL import Image
 
 from apps.accounts.models import User
-from apps.properties.models import MaintenanceRequest, MaintenanceRequestHistory, Property
+from apps.properties.forms import PropertyForm
+from apps.properties.models import (
+    MaintenanceRequest,
+    MaintenanceRequestHistory,
+    Property,
+)
 from apps.tenants.models import Rental
 
 
@@ -51,14 +56,17 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
         with patch.object(
             self.storage,
             "_upload",
-            return_value={"public_id": "new-property-image"},
+            return_value={
+                "public_id": "new-property-image",
+                "version": 1792745196,
+            },
         ) as upload:
             saved_name = self.storage.save(
                 "properties/new-property-image.jpg",
                 ContentFile(b"image data"),
             )
 
-        self.assertEqual(saved_name, "properties/new-property-image")
+        self.assertEqual(saved_name, "properties/v1792745196/new-property-image")
         self.assertEqual(upload.call_args.args[0], "new-property-image.jpg")
         self.assertEqual(
             upload.call_args.args[1].name,
@@ -66,7 +74,7 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
         )
         self.assertTrue(
             self.storage.url(saved_name).endswith(
-                "/image/upload/new-property-image"
+                "/image/upload/v1792745196/new-property-image"
             )
         )
 
@@ -74,6 +82,60 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
         image_url = self.storage.url("maintenance/repair.jpg")
 
         self.assertIn("/media/maintenance/repair.jpg", image_url)
+
+    def test_edit_form_binds_upload_and_preserves_image_when_empty(self):
+        property_obj = Property(
+            image="properties/existing-image",
+            title="Existing property",
+            description="Existing description",
+            property_type="HOUSE",
+            address="1 Existing Road",
+            city="Mumbai",
+            rent="25000",
+            bedrooms=2,
+            bathrooms=1,
+            status="AVAILABLE",
+        )
+        form_data = {
+            "title": "Updated property",
+            "description": "Updated description",
+            "property_type": "HOUSE",
+            "address": "2 New Road",
+            "city": "Mumbai",
+            "rent": "26000",
+            "bedrooms": "2",
+            "bathrooms": "1",
+            "status": "AVAILABLE",
+        }
+        form = PropertyForm(form_data, {}, instance=property_obj)
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(
+            form.save(commit=False).image.name,
+            "properties/existing-image",
+        )
+
+        image_buffer = BytesIO()
+        Image.new("RGB", (10, 10), color="blue").save(
+            image_buffer,
+            format="JPEG",
+        )
+        upload = SimpleUploadedFile(
+            "new-image.jpg",
+            image_buffer.getvalue(),
+            content_type="image/jpeg",
+        )
+        upload_form = PropertyForm(
+            form_data,
+            {"image": upload},
+            instance=property_obj,
+        )
+
+        self.assertTrue(upload_form.is_valid(), upload_form.errors)
+        self.assertEqual(
+            upload_form.save(commit=False).image.name,
+            "new-image.jpg",
+        )
 
 
 class MaintenanceRequestPhotoUploadTests(TestCase):

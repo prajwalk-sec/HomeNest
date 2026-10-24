@@ -1,5 +1,23 @@
 from django import forms
-from .models import MaintenanceRequest
+from .models import MaintenanceRequest, Property
+
+
+class PropertyForm(forms.ModelForm):
+
+    class Meta:
+        model = Property
+        fields = [
+            "image",
+            "title",
+            "description",
+            "property_type",
+            "address",
+            "city",
+            "rent",
+            "bedrooms",
+            "bathrooms",
+            "status",
+        ]
 
 
 class MaintenanceRequestForm(forms.ModelForm):
