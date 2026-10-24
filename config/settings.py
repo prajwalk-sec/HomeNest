@@ -237,12 +237,14 @@ if DATABASE_URL:
         if database_url_scheme not in {"postgres", "postgresql"}:
             raise ValueError
 
+        database_config = dj_database_url.parse(
+            DATABASE_URL,
+            engine="django.db.backends.postgresql",
+            conn_max_age=600,
+        )
+        database_config["ENGINE"] = "django.db.backends.postgresql"
         DATABASES = {
-            "default": dj_database_url.parse(
-                DATABASE_URL,
-                engine="django.db.backends.postgresql",
-                conn_max_age=600,
-            ),
+            "default": database_config,
         }
     except (TypeError, ValueError):
         raise ImproperlyConfigured(
