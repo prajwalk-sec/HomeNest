@@ -513,6 +513,9 @@ Example:
 SECRET_KEY=
 DEBUG=False
 CLOUDINARY_URL=
+# Set DATABASE_URL to the existing PostgreSQL URL for deployment.
+# Local development may instead use DB_NAME, DB_USER, DB_PASSWORD, DB_HOST,
+# and DB_PORT.
 ```
 
 Cloudinary credentials may instead be provided as the complete set
@@ -559,8 +562,9 @@ uploaded to Render. Also set:
   Render's ephemeral filesystem.
 - `PYTHON_VERSION`: `3.11.9` (Render otherwise selects its current default).
 - `DEBUG`: `False`
-- `DATABASE_URL`: the internal connection URL for the separate Render
-  PostgreSQL service.
+- `DATABASE_URL`: required in production; use the internal connection URL for
+  the existing Render PostgreSQL service. Production startup fails clearly if
+  it is absent or does not resolve to a PostgreSQL engine.
 - `ALLOWED_HOSTS`: optionally provide comma-separated hostnames; Render's
   `RENDER_EXTERNAL_HOSTNAME` is added automatically.
 

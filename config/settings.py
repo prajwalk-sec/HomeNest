@@ -229,15 +229,37 @@ TEMPLATES = [
 # DATABASE - POSTGRESQL
 # ============================================================
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-        ),
-    }
+    try:
+        DATABASES = {
+            "default": dj_database_url.parse(
+                DATABASE_URL,
+                conn_max_age=600,
+            ),
+        }
+    except (TypeError, ValueError) as exc:
+        raise ImproperlyConfigured(
+            "DATABASE_URL is invalid. Set it to the internal URL for the "
+            "existing Render PostgreSQL database."
+        ) from exc
+
+    if not DATABASES["default"].get("ENGINE"):
+        raise ImproperlyConfigured(
+            "DATABASE_URL did not resolve to a database engine. Set it to "
+            "the internal URL for the existing Render PostgreSQL database."
+        )
+
+    if not DATABASES["default"]["ENGINE"].endswith("postgresql"):
+        raise ImproperlyConfigured(
+            "DATABASE_URL must point to the existing PostgreSQL database."
+        )
+elif not DEBUG:
+    raise ImproperlyConfigured(
+        "DATABASE_URL is required in production. Set it to the internal URL "
+        "for the existing Render PostgreSQL database."
+    )
 else:
     DATABASES = {
         "default": {
