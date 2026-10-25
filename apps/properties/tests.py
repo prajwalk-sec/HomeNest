@@ -221,6 +221,55 @@ class SetProperty2ImageCommandTests(TestCase):
         self.assertEqual(self.other.image.name, "properties/other.jpg")
 
 
+class PropertyEditImageTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            username="property-image-owner",
+            email="property-image-owner@example.com",
+            password="test-password",
+            role="OWNER",
+        )
+        self.property = Property.objects.create(
+            owner=self.owner,
+            title="Property image",
+            description="Property image test.",
+            property_type="HOUSE",
+            address="2 Image Road",
+            city="Mumbai",
+            rent=25000,
+            status="AVAILABLE",
+        )
+        self.client.force_login(self.owner)
+
+    def test_edit_page_renders_external_url_in_current_image_section(self):
+        image_url = (
+            "https://res.cloudinary.com/drt0y3ldh/image/upload/"
+            "v1792835619/bhouse.jpg"
+        )
+        self.property.image = image_url
+        self.property.save(update_fields=["image"])
+
+        response = self.client.get(
+            reverse("edit_property", args=[self.property.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Property Image")
+        self.assertContains(response, f'src="{image_url}"')
+
+    def test_edit_page_keeps_storage_url_for_uploaded_image(self):
+        self.property.image = "properties/uploaded-image.jpg"
+        self.property.save(update_fields=["image"])
+        expected_image_url = self.property.image.url
+
+        response = self.client.get(
+            reverse("edit_property", args=[self.property.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'src="{expected_image_url}"')
+
+
 class MaintenanceRequestPhotoUploadTests(TestCase):
 
     def test_tenant_can_submit_maintenance_request_with_optional_photo(self):

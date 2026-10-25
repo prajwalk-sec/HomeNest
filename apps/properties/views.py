@@ -185,6 +185,15 @@ def edit_property(request, property_id):
         else:
             return redirect("my_properties")
 
+    property_image_url = ""
+    if property_obj.image:
+        image_name = property_obj.image.name
+        property_image_url = (
+            image_name
+            if image_name.startswith(("http://", "https://"))
+            else property_obj.image.url
+        )
+
     # Display the existing property information
     # inside the edit form.
     return render(
@@ -193,6 +202,7 @@ def edit_property(request, property_id):
         {
             "property": property_obj,
             "form": form,
+            "property_image_url": property_image_url,
         },
     )
 
