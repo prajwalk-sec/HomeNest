@@ -213,7 +213,7 @@ class CloudinarySettingsTests(SimpleTestCase):
         self.assertNotIn("url-secret", result.stdout + result.stderr)
         self.assertNotIn("individual-secret", result.stdout + result.stderr)
 
-    def test_both_methods_require_explicit_selection(self):
+    def test_cloudinary_url_is_default_when_both_methods_are_configured(self):
         result = self.run_settings_import(
             "",
             self.cloudinary_url,
@@ -224,12 +224,12 @@ class CloudinarySettingsTests(SimpleTestCase):
             },
         )
 
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn(
-            "Set CLOUDINARY_CONFIG_SOURCE=url or "
-            "CLOUDINARY_CONFIG_SOURCE=individual",
-            result.stderr,
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            result.stdout.splitlines(),
+            ["", "True", "True", "True", "False", "False", "False"],
         )
+        self.assertIn("defaulting to CLOUDINARY_URL", result.stderr)
         self.assertNotIn("url-secret", result.stdout + result.stderr)
         self.assertNotIn("individual-secret", result.stdout + result.stderr)
 

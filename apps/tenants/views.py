@@ -165,11 +165,21 @@ def property_details(request, property_id):
         status="AVAILABLE",
     )
 
+    property_image_url = ""
+    if property_obj.image:
+        image_name = property_obj.image.name
+        property_image_url = (
+            image_name
+            if image_name.startswith(("http://", "https://"))
+            else property_obj.image.url
+        )
+
     return render(
         request,
         "tenants/property_details.html",
         {
             "property": property_obj,
+            "property_image_url": property_image_url,
         },
     )
 
@@ -282,4 +292,3 @@ def my_rental_requests(request):
             "rentals": rentals,
         },
     )
-

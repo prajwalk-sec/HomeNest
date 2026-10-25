@@ -1,10 +1,11 @@
-from io import BytesIO
+from io import BytesIO, StringIO
 from unittest import skipUnless
 from unittest.mock import patch
 
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import (
     SimpleTestCase,
     TestCase,
@@ -172,6 +173,52 @@ class PropertyCloudinaryStorageTests(SimpleTestCase):
             upload_form.save(commit=False).image.name,
             "new-image.jpg",
         )
+
+
+class SetProperty2ImageCommandTests(TestCase):
+    def setUp(self):
+        owner = User.objects.create_user(
+            username="image-command-owner",
+            email="image-command-owner@example.com",
+            password="test-password",
+            role="OWNER",
+        )
+        self.target = Property.objects.create(
+            pk=2,
+            owner=owner,
+            title="Target property",
+            description="Target description.",
+            property_type="HOUSE",
+            address="2 Target Road",
+            city="Mumbai",
+            rent=25000,
+            image="properties/target.jpg",
+        )
+        self.other = Property.objects.create(
+            pk=3,
+            owner=owner,
+            title="Other property",
+            description="Other description.",
+            property_type="HOUSE",
+            address="3 Other Road",
+            city="Mumbai",
+            rent=25000,
+            image="properties/other.jpg",
+        )
+
+    def test_updates_only_property_id_2(self):
+        call_command("set_property_2_image", stdout=StringIO())
+
+        self.target.refresh_from_db()
+        self.other.refresh_from_db()
+        self.assertEqual(
+            self.target.image.name,
+            "https://res.cloudinary.com/drt0y3ldh/image/upload/"
+            "v1792835619/bhouse.jpg",
+        )
+        self.assertEqual(self.target.title, "Target property")
+        self.assertEqual(self.target.description, "Target description.")
+        self.assertEqual(self.other.image.name, "properties/other.jpg")
 
 
 class MaintenanceRequestPhotoUploadTests(TestCase):

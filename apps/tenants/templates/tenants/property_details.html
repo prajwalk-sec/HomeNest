@@ -50,7 +50,7 @@
                 <div class="property-details-card">
                     <div class="image-section">
                         {% if property.image %}
-                            <img src="{{ property.image.url }}" alt="{{ property.title }}" class="property-image" data-placeholder-src="{% static 'properties/images/property-placeholder.svg' %}" onerror="console.error('Property image failed to load:', this.src); this.onerror=null; this.src=this.dataset.placeholderSrc;">
+                            <img src="{{ property_image_url }}" alt="{{ property.title }}" class="property-image" data-placeholder-src="{% static 'properties/images/property-placeholder.svg' %}" onerror="console.error('Property image failed to load:', this.src); this.onerror=null; this.src=this.dataset.placeholderSrc;">
                         {% else %}
                             <img src="{% static 'properties/images/property-placeholder.svg' %}" alt="No image available for {{ property.title }}" class="property-image">
                         {% endif %}

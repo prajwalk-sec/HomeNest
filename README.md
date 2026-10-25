@@ -520,10 +520,12 @@ CLOUDINARY_URL=
 
 Cloudinary credentials may instead be provided as the complete set
 `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
-If both credential methods are present, set `CLOUDINARY_CONFIG_SOURCE` to
-`url` or `individual` to explicitly select one; the other method is ignored
-and a warning names the conflicting variable names without logging values.
-Without both methods present, the available method is selected automatically.
+If both credential methods are present, `CLOUDINARY_URL` is selected by
+default and the separate credentials are ignored with a warning naming the
+variable names only. Set `CLOUDINARY_CONFIG_SOURCE=individual` to explicitly
+select the separate credentials instead. `CLOUDINARY_CONFIG_SOURCE=url` can
+also explicitly select the URL method. Without both methods present, the
+available method is selected automatically.
 Django validates that the selected method supplies all required credentials
 at startup without displaying their values.
 
@@ -560,9 +562,9 @@ uploaded to Render. Also set:
   account, or configure all three variables `CLOUDINARY_CLOUD_NAME`,
   `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` instead. Use exactly one
   method and add credential values as secret environment variables; do not put
-  them in source code. If both methods are currently configured, set
-  `CLOUDINARY_CONFIG_SOURCE=url` to use the URL or
-  `CLOUDINARY_CONFIG_SOURCE=individual` to use the separate variables.
+  them in source code. If both methods are currently configured,
+  `CLOUDINARY_URL` is used by default; set
+  `CLOUDINARY_CONFIG_SOURCE=individual` to use the separate variables instead.
   Cloudinary credentials are required when `DEBUG=False` so production uploads
   use durable Cloudinary media storage instead of Render's ephemeral filesystem.
 - `PYTHON_VERSION`: `3.11.9` (Render otherwise selects its current default).
